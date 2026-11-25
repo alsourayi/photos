@@ -33,11 +33,26 @@ button:disabled{opacity:.45}
 #toast{position:fixed;bottom:14px;left:12px;right:12px;background:#222;color:#fff;padding:12px;border-radius:10px;display:none;z-index:9;text-align:center}
 details summary{font-weight:700;padding:6px 0}
 .map{display:flex;gap:6px;margin:4px 0}.map input{width:90px}.map select{flex:1}
+
+.tabs{display:flex;background:#16392c}.tabs button{border-radius:0;margin:0;background:transparent;color:#cfe3d8;border-bottom:4px solid transparent;padding:12px}
+.tabs button.on{color:#fff;border-bottom-color:#e8c15a}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gi{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#ddd;cursor:pointer}
+.gi img{width:100%;height:100%;object-fit:cover;display:block}
+.gi span{position:absolute;bottom:0;left:0;right:0;background:#000a;color:#fff;font-size:12px;text-align:center;padding:2px}
+.gi.loc::after{content:"محلي";position:absolute;top:4px;right:4px;background:#e8c15a;color:#222;font-size:11px;padding:1px 5px;border-radius:6px}
+details.gc{margin-bottom:10px}details.gc>summary{font-weight:800;background:#e5e0d3;padding:8px 10px;border-radius:8px;margin-bottom:6px;list-style:none}
+.chips{display:flex;gap:6px;margin:8px 0}.chips button{margin:0;padding:8px;font-size:15px}
+#ov{position:fixed;inset:0;background:#000d;z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;padding:12px}
+#ov img{max-width:100%;max-height:70vh;border-radius:8px}#ov .cap{color:#fff;margin:10px;font-size:18px;text-align:center}
+#ov .row{width:100%;max-width:420px}
 </style>
 </head>
 <body>
 <header><h1>📷 تطبيق الصور</h1><small>صوّر الصنف، اكتب الكود، والتصنيف تلقائي</small></header>
+<div class="tabs"><button type="button" id="tabAdd" class="on">📷 إضافة</button><button type="button" id="tabGal">🖼️ الاستوديو <span id="galN"></span></button></div>
 <main>
+<div id="viewAdd">
 <div class="card" id="addCard">
   <div class="row">
     <button type="button" id="btnCam">📸 تصوير</button>
@@ -74,7 +89,19 @@ details summary{font-weight:700;padding:6px 0}
 <div class="card"><details><summary>⚙ ربط أول 3 أرقام من الكود بالفئة</summary>
 <div class="hint">لو الكود يبدأ بـ 041 يتصنف تلقائي. أي بادئة جديدة اختار لها فئة مرة واحدة وهتتحفظ.</div>
 <div id="maps"></div><button type="button" id="btnAddMap" class="sec">+ إضافة ربط</button></details></div>
+</div>
+<div id="viewGal" hidden>
+<div class="card">
+  <input id="gq" placeholder="ابحث بالكود (مثال 044 أو 0124)" inputmode="search">
+  <div class="chips"><button type="button" id="gAll" class="">الكل</button><button type="button" id="gHome" class="sec">منزلي</button><button type="button" id="gOff" class="sec">مكتبي</button></div>
+  <div class="hint" id="gStat"></div>
+  <button type="button" id="btnUp" class="sec" hidden>☁ رفع صوري المحلية للدرايف</button>
+  <div class="hint" id="upStat"></div>
+</div>
+<div id="gList"></div>
+</div>
 </main>
+<div id="ov"><img id="ovImg" alt=""><div class="cap" id="ovCap"></div><div class="row"><a id="ovDrive" target="_blank" rel="noopener"><button type="button" class="sec">فتح في الدرايف</button></a><button type="button" id="ovClose">إغلاق</button></div></div>
 <div id="toast"></div>
 <script>
 "use strict";
@@ -162,7 +189,8 @@ function fileNames(items){
     let base=p.code+(p.note?" "+p.note:"");let n=base,i=1;const k=p.sec+"/"+p.cat+"/";
     while(used[k+n]){i++;n=base+" ("+i+")"}used[k+n]=1;return {p,path:p.sec+"/"+p.cat+"/"+n+".jpg"}})
 }
-async function render(){
+async function render(){try{if(typeof renderGallery==='function'&&!$('viewGal').hidden)renderGallery()}catch(e){}
+
   const items=await getAll();items.sort((a,b)=>(a.sec+a.cat+a.code).localeCompare(b.sec+b.cat+b.code));
   $("sTot").textContent=items.length;$("sCat").textContent=new Set(items.map(p=>p.sec+p.cat)).size;$("sCodes").textContent=new Set(items.map(p=>p.code)).size;
   $("btnExport").disabled=$("btnShare").disabled=!items.length;$("btnWipe").hidden=!items.length;
@@ -228,8 +256,54 @@ function init(){
   $("btnAddMap").onclick=()=>toast("الربط بيتحفظ تلقائي لما تحفظ صور بكود جديد");
   renderMaps();render();
 }
-openDB().catch(()=>{useMem=true}).then(loadMaps).then(init);
+openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+// ===== Gallery =====
+let G={endpoint:"",items:[]},gSec="",gQ="";
+const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
+function codeOf(n){return n.replace(/\.[^.]+$/,"")}
+async function loadGallery(){
+  try{const r=await fetch("gallery.json?"+Date.now());G=await r.json()}catch(e){}
+  if(G.endpoint){try{const r=await fetch(G.endpoint+"?action=list");const j=await r.json();if(j&&j.items){G.items=j.items;$("gStat").dataset.live="1"}}catch(e){}}
+  await renderGallery();
+}
+async function renderGallery(){
+  const loc=await getAll();
+  const q=normDigits(gQ).toLowerCase().replace(/\s/g,"");
+  const match=o=>(!gSec||o.s===gSec)&&(!q||codeOf(o.n).toLowerCase().replace(/\s/g,"").includes(q)||o.c.includes(gQ.trim()));
+  const groups={};
+  G.items.filter(match).forEach(o=>{const k=o.s+" / "+o.c;(groups[k]=groups[k]||[]).push({src:thumbUrl(o.i,300),big:thumbUrl(o.i,1200),cap:codeOf(o.n)+" - "+o.c,id:o.i,label:codeOf(o.n)})});
+  const lg=loc.filter(p=>(!gSec||p.sec===gSec)&&(!q||p.code.includes(q)));
+  lg.forEach(p=>{const k=p.sec+" / "+p.cat;(groups[k]=groups[k]||[]).push({src:p.thumb,big:URL.createObjectURL(p.blob),cap:p.code+" - "+p.cat+" (محلي، لم يُرفع)",label:p.code,local:true})});
+  const L=$("gList");L.innerHTML="";const keys=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
+  let total=0;
+  keys.forEach(k=>{const d=document.createElement("details");d.className="gc";d.open=!!q||keys.length<=3;
+    const s=document.createElement("summary");s.textContent=k+" ("+groups[k].length+")";d.appendChild(s);
+    const g=document.createElement("div");g.className="grid";
+    groups[k].forEach(it=>{total++;const c=document.createElement("div");c.className="gi"+(it.local?" loc":"");const im=document.createElement("img");im.loading="lazy";im.alt=it.label;im.src=it.src;c.appendChild(im);const sp=document.createElement("span");sp.textContent=it.label;c.appendChild(sp);c.onclick=()=>openOv(it);g.appendChild(c)});
+    d.appendChild(g);L.appendChild(d)});
+  if(!total)L.innerHTML='<div class="card hint">لا توجد نتائج.</div>';
+  $("gStat").textContent=G.items.length+" صنف في الدرايف"+(loc.length?" + "+loc.length+" محلي":"")+(G.endpoint?" (مباشر)":" (آخر تحديث من الدرايف)");
+  $("galN").textContent="("+(G.items.length+loc.length)+")";
+  $("btnUp").hidden=!(G.endpoint&&loc.length);
+}
+function openOv(it){$("ovImg").src=it.big;$("ovCap").textContent=it.cap;const a=$("ovDrive");if(it.id){a.href="https://drive.google.com/file/d/"+it.id+"/view";a.hidden=false}else a.hidden=true;$("ov").style.display="flex"}
+function setTab(g){$("viewAdd").hidden=g;$("viewGal").hidden=!g;$("tabAdd").classList.toggle("on",!g);$("tabGal").classList.toggle("on",g);if(g)renderGallery()}
+function blobB64(b){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(String(f.result).split(",")[1]);f.readAsDataURL(b)})}
+async function uploadAll(){
+  const loc=await getAll();if(!loc.length||!G.endpoint)return;const named=fileNames(loc);let ok=0,bad=0;
+  $("btnUp").disabled=true;
+  for(const n of named){$("upStat").textContent="جاري الرفع "+(ok+bad+1)+" من "+named.length;
+    try{const parts=n.path.split("/");const r=await fetch(G.endpoint,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({sec:n.p.sec,cat:n.p.cat,name:parts[2],data:await blobB64(n.p.blob)})});const j=await r.json();if(j.ok){await del(n.p.id);ok++}else bad++}catch(e){bad++}}
+  $("upStat").textContent="تم رفع "+ok+" وفشل "+bad;$("btnUp").disabled=false;await render();await loadGallery();
+}
+$("tabAdd").onclick=()=>setTab(false);$("tabGal").onclick=()=>setTab(true);
+$("gq").oninput=e=>{gQ=e.target.value;renderGallery()};
+[["gAll",""],["gHome","منزلي"],["gOff","مكتبي"]].forEach(([id,v])=>$(id).onclick=()=>{gSec=v;["gAll","gHome","gOff"].forEach(x=>$(x).className=x===id?"":"sec");renderGallery()});
+$("ovClose").onclick=()=>$("ov").style.display="none";$("ov").onclick=e=>{if(e.target.id==="ov")$("ov").style.display="none"};
+$("btnUp").onclick=uploadAll;
+
 window.__app={normCode,validCode,buildZip,getAll};
 </script>
 </body>
