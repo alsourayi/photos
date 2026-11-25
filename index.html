@@ -46,7 +46,7 @@ details.gc{margin-bottom:10px}details.gc>summary{font-weight:800;background:#e5e
 #ov{position:fixed;inset:0;padding-bottom:env(safe-area-inset-bottom);background:#000d;z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;padding:12px}
 #ov img{max-width:100%;max-height:70vh;max-height:65dvh;border-radius:8px}#ov .cap{color:#fff;margin:10px;font-size:18px;text-align:center}
 #ov .row{width:100%;max-width:420px}
-.gi.err{background:#eee;min-height:90px}.gi.err::before{content:"📷";display:block;text-align:center;font-size:28px;padding-top:20px}#ov .nav{position:absolute;top:36%;width:46px;height:46px;border-radius:50%;margin:0;padding:0;background:#000a;color:#fff;font-size:22px;border:1px solid #fff6;z-index:2}#ov{touch-action:pan-y}</style>
+.gi.err{background:#eee;min-height:90px}.gi.err::before{content:"📷";display:block;text-align:center;font-size:28px;padding-top:20px}#ov .nav{direction:ltr;unicode-bidi:isolate;position:absolute;top:36%;width:46px;height:46px;border-radius:50%;margin:0;padding:0;background:#000a;color:#fff;font-size:22px;border:1px solid #fff6;z-index:2}#ov{touch-action:pan-y}</style>
 </head>
 <body>
 <header><h1>📷 تطبيق الصور</h1><small>السريع الدولية | Alsourayi - صوّر الصنف، اكتب الكود، والتصنيف تلقائي</small></header>
@@ -261,7 +261,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v6 - 2026-11-25 23:10";
+let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v6.1 - 2026-11-25 23:15";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
