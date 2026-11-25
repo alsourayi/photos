@@ -102,7 +102,7 @@ details.gc{margin-bottom:10px}details.gc>summary{font-weight:800;background:#e5e
 <div id="gList"></div>
 </div>
 </main>
-<div id="ov"><img id="ovImg" alt=""><div class="cap" id="ovCap"></div><div class="row"><a id="ovDrive" target="_blank" rel="noopener"><button type="button" class="sec">فتح في الدرايف</button></a><button type="button" id="ovClose">إغلاق</button></div></div>
+<div id="ov"><img id="ovImg" alt=""><div class="cap" id="ovCap"></div><div class="row"><button type="button" id="ovDl">⬇ تحميل</button><a id="ovDrive" target="_blank" rel="noopener"><button type="button" class="sec">فتح في الدرايف</button></a><button type="button" id="ovClose">إغلاق</button></div></div>
 <div id="toast"></div>
 <script>
 "use strict";
@@ -261,7 +261,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gSec="",gQ="",T={};const APPV="v4.2 - 2026-11-25 21:35";
+let G={endpoint:"",items:[]},gSec="",gQ="",T={};const APPV="v4.3 - 2026-11-25 22:00";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
@@ -290,7 +290,7 @@ async function renderGallery(){
   $("galN").textContent="("+(G.items.length+loc.length)+")";
   $("btnUp").hidden=!(G.endpoint&&loc.length);
 }
-function openOv(it){$("ovImg").onerror=()=>{if(it.id&&!$("ovImg").dataset.r){$("ovImg").dataset.r=1;$("ovImg").src=it.src}};delete $("ovImg").dataset.r;$("ovImg").src=it.big;$("ovCap").textContent=it.cap;const a=$("ovDrive");if(it.id){a.href="https://drive.google.com/file/d/"+it.id+"/view";a.hidden=false}else a.hidden=true;$("ov").style.display="flex"}
+let curIt=null;function openOv(it){curIt=it;$("ovDl").textContent="⬇ تحميل";$("ovImg").onerror=()=>{if(it.id&&!$("ovImg").dataset.r){$("ovImg").dataset.r=1;$("ovImg").src=it.src}};delete $("ovImg").dataset.r;$("ovImg").src=it.big;$("ovCap").textContent=it.cap;const a=$("ovDrive");if(it.id){a.href="https://drive.google.com/file/d/"+it.id+"/view";a.hidden=false}else a.hidden=true;$("ov").style.display="flex"}
 function setTab(g){$("viewAdd").hidden=g;$("viewGal").hidden=!g;$("tabAdd").classList.toggle("on",!g);$("tabGal").classList.toggle("on",g);if(g)renderGallery()}
 function blobB64(b){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(String(f.result).split(",")[1]);f.readAsDataURL(b)})}
 async function uploadAll(){
@@ -317,4 +317,19 @@ document.getElementById("btnRef").onclick=async()=>{const st=document.getElement
  const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg)await reg.update();
  T={};await loadGallery();st.textContent="تم التحديث: "+G.items.length+" صنف"+(G.updated?" (آخر تحديث للقائمة "+G.updated+")":"")}catch(e){st.textContent="تعذر التحديث، تأكد من الإنترنت"}};
 window.addEventListener("online",()=>{});
+</script>
+<script>
+document.getElementById("ovDl").onclick=async()=>{const it=curIt;if(!it)return;const b=document.getElementById("ovDl");
+ const fn=(it.label||"image").replace(/[\\/:*?"<>|]/g,"_")+".jpg";
+ const save=(blob)=>{const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),20000)};
+ b.disabled=true;b.textContent="جاري التحميل...";
+ try{
+  if(it.local){const r=await fetch(it.big);save(await r.blob())}
+  else{const r=await fetch("https://lh3.googleusercontent.com/d/"+it.id+"=s0");if(!r.ok)throw 1;const bl=await r.blob();if(!bl.type.startsWith("image/")||bl.size<500)throw 2;save(bl)}
+  b.textContent="✔ تم التحميل"
+ }catch(e){
+  b.textContent="⬇ تحميل";
+  if(it.id){window.open("https://drive.google.com/uc?export=download&id="+it.id,"_blank")}else alert("تعذر التحميل")
+ }
+ b.disabled=false};
 </script>
