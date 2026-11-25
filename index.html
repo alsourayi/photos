@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1f4e3d"><link rel="icon" href="icon.svg"><title>تطبيق الصور - المناديب</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,"Noto Sans Arabic",Tahoma,sans-serif;background:#f4f1ea;color:#222;font-size:17px}
+header{background:#1f4e3d;color:#fff;padding:14px 16px;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:20px}
+header small{opacity:.85}
+main{padding:12px;max-width:640px;margin:auto}
+.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px #0002}
+label{display:block;font-weight:600;margin:10px 0 4px}
+input,select,button{font:inherit;width:100%;padding:12px;border-radius:10px;border:1px solid #bbb;background:#fff}
+button{background:#1f4e3d;color:#fff;border:0;font-weight:700;margin-top:10px}
+button.sec{background:#e5e0d3;color:#222}
+button.red{background:#b3261e}
+button:disabled{opacity:.45}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding:6px 0}
+.thumbs img{height:84px;width:84px;object-fit:cover;border-radius:8px;border:2px solid #ddd}
+.thumbs img.sel{border-color:#1f4e3d}
+.hint{font-size:14px;color:#666;margin-top:4px}
+.ok{color:#1b7a3d;font-weight:700}.warn{color:#b3261e;font-weight:700}
+.cat{font-weight:800;margin:14px 0 6px;background:#e5e0d3;padding:6px 10px;border-radius:8px}
+.item{display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid #eee}
+.item img{width:56px;height:56px;object-fit:cover;border-radius:8px}
+.item .t{flex:1}.item button{width:auto;margin:0;padding:8px 12px}
+.stats{display:flex;gap:8px}.stats div{flex:1;text-align:center;background:#eef5f0;border-radius:10px;padding:8px}
+.stats b{display:block;font-size:22px}
+#toast{position:fixed;bottom:14px;left:12px;right:12px;background:#222;color:#fff;padding:12px;border-radius:10px;display:none;z-index:9;text-align:center}
+details summary{font-weight:700;padding:6px 0}
+.map{display:flex;gap:6px;margin:4px 0}.map input{width:90px}.map select{flex:1}
+</style>
+</head>
+<body>
+<header><h1>📷 تطبيق الصور</h1><small>صوّر الصنف، اكتب الكود، والتصنيف تلقائي</small></header>
+<main>
+<div class="card" id="addCard">
+  <div class="row">
+    <button type="button" id="btnCam">📸 تصوير</button>
+    <button type="button" id="btnPick" class="sec">🖼️ من المعرض</button>
+  </div>
+  <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+  <input type="file" id="fPick" accept="image/*" multiple hidden>
+  <div class="thumbs" id="pending"></div>
+  <div id="form" hidden>
+    <label for="code">كود الصنف (مثال 041-0005)</label>
+    <input id="code" inputmode="numeric" autocomplete="off" placeholder="041-0005">
+    <div class="hint" id="codeHint"></div>
+    <label for="sec">القسم</label>
+    <select id="sec"></select>
+    <label for="cat">الفئة</label>
+    <select id="cat"></select>
+    <div class="hint" id="catHint"></div>
+    <label for="note">ملاحظة اللون / الزاوية (اختياري)</label>
+    <input id="note" placeholder="أسود / بني / جانب">
+    <button type="button" id="btnSave">✔ حفظ الصور (<span id="nPend">0</span>)</button>
+    <button type="button" id="btnClear" class="sec">إلغاء</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="stats"><div><b id="sTot">0</b>صورة</div><div><b id="sCat">0</b>فئة</div><div><b id="sCodes">0</b>كود</div></div>
+  <button type="button" id="btnExport">⬇ تصدير الكل (ملف ZIP مرتب بالفئات)</button>
+  <button type="button" id="btnShare" class="sec">📤 مشاركة (واتساب / درايف)</button>
+  <div class="hint" id="exHint"></div>
+</div>
+
+<div class="card"><div id="list"></div><button type="button" id="btnWipe" class="red" hidden>مسح كل الصور من الجهاز بعد التصدير</button></div>
+
+<div class="card"><details><summary>⚙ ربط أول 3 أرقام من الكود بالفئة</summary>
+<div class="hint">لو الكود يبدأ بـ 041 يتصنف تلقائي. أي بادئة جديدة اختار لها فئة مرة واحدة وهتتحفظ.</div>
+<div id="maps"></div><button type="button" id="btnAddMap" class="sec">+ إضافة ربط</button></details></div>
+</main>
+<div id="toast"></div>
+<script>
+"use strict";
+const CATS={
+"منزلي":["سرير مفرد","سرير دورين","سرير مزدوج","طاولة خدمة","طاولة طعام","طاولة حفلات","طاولة كوي","طاولة مدخل","طقم 2كرسي + طاولة","كنب منزلي","جلسات حدائق","دولاب تليفزيون","دولاب بلازما","دولاب ملابس","دولاب تسريحه","دولاب احذية","دولاب بوفيه","مرتبة طبي","مرتبة اسفنج","مرتبة اسبرنج","ديكورات","مزهريات","غرفة نوم","ملحقات غرف نوم","مظلات","مفارش طاولات","اغطية كراسي","كرسي حفلات","كرسي مساج","كرسي طعام"],
+"مكتبي":["طاولة خدمة","ملحقات أثاث مكتبى","طاولة اجتماع","طاولة مكتب صغيرة","طاولة استقبال","طاولات كمبيوتر","كرسي محاضرات","كرسي انتظار","كرسي ثابت","كرسي دوار","كرسي مسرح مكتبي","دولاب ملفات صغيرة","دولاب ملفات كبيرة","كنب مكتبي","طاولات مدرسية","وحدة عمل","وحدة استقبال","مكتب موظف","مكتب اداري","مكتب مدير","كراسي"]};
+// Presets = prefixes published on the shared catalog; editable per device.
+const SEED={"020":["مكتبي","كنب مكتبي"],"202":["منزلي","طاولة طعام"],"201":["مكتبي","طاولة خدمة"],"010":["مكتبي","مكتب مدير"],"015":["مكتبي","وحدة استقبال"],"031":["مكتبي","دولاب ملفات كبيرة"],"042":["مكتبي","كرسي دوار"],"043":["مكتبي","كرسي ثابت"],"044":["مكتبي","كرسي انتظار"],"041":["مكتبي","كرسي مسرح مكتبي"],"504":["مكتبي","طاولة اجتماع"],"103":["منزلي","كرسي مساج"]};
+const $=id=>document.getElementById(id);
+const AR="٠١٢٣٤٥٦٧٨٩",FA="۰۱۲۳۴۵۶۷۸۹";
+function normDigits(s){return s.replace(/[٠-٩]/g,d=>AR.indexOf(d)).replace(/[۰-۹]/g,d=>FA.indexOf(d))}
+function normCode(raw){
+  let s=normDigits(raw||"").trim();
+  const only=s.replace(/[^0-9]/g,"");
+  if(/^\d{7}$/.test(only)&&!/[A-Za-z]/.test(s)) return only.slice(0,3)+"-"+only.slice(3);
+  return s.replace(/[\\\/:*?"<>|]/g,"").replace(/\s+/g,"").replace(/_/g,"-");
+}
+function validCode(c){return /^\d{3}-\d{4}$/.test(c)}
+// ---- IndexedDB
+let db;
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open("repphotos",1);
+ r.onupgradeneeded=()=>{r.result.createObjectStore("photos",{keyPath:"id",autoIncrement:true});r.result.createObjectStore("kv")};
+ r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)})}
+const tx=(s,m="readonly")=>db.transaction(s,m).objectStore(s);
+const req=r=>new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const allPhotos=()=>req(tx("photos").getAll());
+// fallback memory store if IndexedDB is blocked
+let mem=[],useMem=false;
+async function getAll(){return useMem?mem.slice():allPhotos()}
+async function add(p){if(useMem){p.id=mem.length+1+Math.random();mem.push(p)}else await req(tx("photos","readwrite").add(p))}
+async function del(id){if(useMem)mem=mem.filter(x=>x.id!==id);else await req(tx("photos","readwrite").delete(id))}
+async function wipe(){if(useMem)mem=[];else await req(tx("photos","readwrite").clear())}
+let maps={...SEED};
+async function loadMaps(){try{const v=useMem?null:await req(tx("kv").get("maps"));if(v)maps={...SEED,...v}}catch(e){}}
+async function saveMaps(){try{if(!useMem)await req(tx("kv","readwrite").put(maps,"maps"))}catch(e){}}
+// ---- image resize
+function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>{res({i,u})};i.onerror=()=>rej(new Error("img"));i.src=u})}
+async function shrink(file,max=1600,q=0.85){
+  const {i,u}=await loadImg(file);
+  let w=i.naturalWidth,h=i.naturalHeight;const k=Math.min(1,max/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
+  const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(i,0,0,w,h);
+  URL.revokeObjectURL(u);
+  const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",q));
+  const tc=document.createElement("canvas");const tk=160/Math.max(w,h);tc.width=Math.round(w*tk);tc.height=Math.round(h*tk);tc.getContext("2d").drawImage(c,0,0,tc.width,tc.height);
+  const thumb=tc.toDataURL("image/jpeg",0.7);
+  return {blob,thumb};
+}
+// ---- state
+let pending=[]; // {file,url}
+function toast(m){const t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display="none",3200)}
+function fillSec(){const s=$("sec");s.innerHTML="";Object.keys(CATS).forEach(k=>s.add(new Option(k,k)));fillCat()}
+function fillCat(sel){const c=$("cat");c.innerHTML="";c.add(new Option("— اختر الفئة —",""));CATS[$("sec").value].forEach(k=>c.add(new Option(k,k)));if(sel)c.value=sel}
+function onCode(){
+  const c=normCode($("code").value);
+  const h=$("codeHint"),ch=$("catHint");
+  if(!c){h.textContent="";ch.textContent="";return}
+  if(validCode(c)){h.innerHTML='<span class="ok">الكود صحيح: '+c+'</span>';
+    const m=maps[c.slice(0,3)];
+    if(m){$("sec").value=m[0];fillCat(m[1]);ch.innerHTML='<span class="ok">تصنيف تلقائي من البادئة '+c.slice(0,3)+'</span>'}
+    else{$("cat").value="";ch.innerHTML='<span class="warn">بادئة جديدة '+c.slice(0,3)+': اختر الفئة مرة واحدة وهتتحفظ</span>'}
+  }else{h.innerHTML='<span class="warn">الكود لازم 3 أرقام - 4 أرقام (مثال 041-0005)</span>';ch.textContent=""}
+}
+function renderPending(){
+  const p=$("pending");p.innerHTML="";pending.forEach(x=>{const i=document.createElement("img");i.src=x.url;p.appendChild(i)});
+  $("form").hidden=!pending.length;$("nPend").textContent=pending.length;
+}
+function addFiles(list){for(const f of list){if(f.type.startsWith("image/")||/\.(jpe?g|png|webp|heic)$/i.test(f.name))pending.push({file:f,url:URL.createObjectURL(f)})}renderPending();if(pending.length)$("code").focus()}
+function clearPending(){$("cat").value="";pending.forEach(x=>URL.revokeObjectURL(x.url));pending=[];renderPending();$("code").value="";$("note").value="";$("codeHint").textContent="";$("catHint").textContent=""}
+let saving=false;
+async function save(){
+  if(saving)return;
+  const code=normCode($("code").value),sec=$("sec").value,cat=$("cat").value,note=$("note").value.trim().replace(/[\\\/:*?"<>|]/g,"");
+  if(!validCode(code))return toast("اكتب الكود صح (مثال 041-0005)");
+  if(!cat)return toast("اختر الفئة");
+  saving=true;$("btnSave").disabled=true;
+  try{
+    for(const x of pending){const s=await shrink(x.file);await add({code,sec,cat,note,blob:s.blob,thumb:s.thumb,ts:Date.now()})}
+    if(!maps[code.slice(0,3)]||maps[code.slice(0,3)][1]!==cat||maps[code.slice(0,3)][0]!==sec){maps[code.slice(0,3)]=[sec,cat];await saveMaps();renderMaps()}
+    const n=pending.length;clearPending();await render();toast("تم حفظ "+n+" صورة")
+  }catch(e){toast("حصل خطأ في الصورة: "+e.message)}
+  saving=false;$("btnSave").disabled=false;
+}
+function fileNames(items){
+  const used={};return items.map(p=>{
+    let base=p.code+(p.note?" "+p.note:"");let n=base,i=1;const k=p.sec+"/"+p.cat+"/";
+    while(used[k+n]){i++;n=base+" ("+i+")"}used[k+n]=1;return {p,path:p.sec+"/"+p.cat+"/"+n+".jpg"}})
+}
+async function render(){
+  const items=await getAll();items.sort((a,b)=>(a.sec+a.cat+a.code).localeCompare(b.sec+b.cat+b.code));
+  $("sTot").textContent=items.length;$("sCat").textContent=new Set(items.map(p=>p.sec+p.cat)).size;$("sCodes").textContent=new Set(items.map(p=>p.code)).size;
+  $("btnExport").disabled=$("btnShare").disabled=!items.length;$("btnWipe").hidden=!items.length;
+  const L=$("list");L.innerHTML=items.length?"":'<div class="hint">لا توجد صور محفوظة بعد.</div>';
+  let last="";
+  for(const p of items){const g=p.sec+" / "+p.cat;if(g!==last){last=g;const d=document.createElement("div");d.className="cat";d.textContent=g;L.appendChild(d)}
+    const r=document.createElement("div");r.className="item";
+    r.innerHTML='<img alt=""><div class="t"><b></b><div class="hint"></div></div><button type="button" class="red">حذف</button>';
+    r.querySelector("img").src=p.thumb;r.querySelector("b").textContent=p.code;r.querySelector(".hint").textContent=p.note||"";
+    const b=r.querySelector("button");b.onclick=async()=>{if(b.dataset.s!=="1"){b.dataset.s="1";b.textContent="تأكيد؟";return}await del(p.id);render()};
+    L.appendChild(r)}
+}
+// ---- ZIP (store)
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function dosTime(d){return{t:(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),d:((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate()}}
+async function makeZip(entries){
+  const enc=new TextEncoder(),parts=[],cd=[];let off=0;const dt=dosTime(new Date());
+  for(const e of entries){
+    const name=enc.encode(e.path),data=new Uint8Array(await e.blob.arrayBuffer()),crc=crc32(data);
+    const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,dt.t,true);h.setUint16(12,dt.d,true);h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);h.setUint16(28,0,true);
+    parts.push(h.buffer,name,data);
+    const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,dt.t,true);c.setUint16(14,dt.d,true);c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+    cd.push(c.buffer,name);off+=30+name.length+data.length}
+  let cdSize=0;cd.forEach(b=>cdSize+=b.byteLength);
+  const end=new DataView(new ArrayBuffer(22));end.setUint32(0,0x06054b50,true);end.setUint16(8,entries.length,true);end.setUint16(10,entries.length,true);end.setUint32(12,cdSize,true);end.setUint32(16,off,true);
+  return new Blob([...parts,...cd,end.buffer],{type:"application/zip"});
+}
+async function buildZip(){
+  const items=await getAll();if(!items.length)return null;
+  const named=fileNames(items);
+  const entries=named.map(n=>({path:n.path,blob:n.p.blob}));
+  const csv="\ufeffcode,section,category,note,file\r\n"+named.map(n=>[n.p.code,n.p.sec,n.p.cat,n.p.note,n.path].map(v=>'"'+String(v||"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  entries.push({path:"index.csv",blob:new Blob([csv],{type:"text/csv"})});
+  const d=new Date(),pad=n=>String(n).padStart(2,"0");
+  const name="photos-"+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())+".zip";
+  return {blob:await makeZip(entries),name,count:items.length};
+}
+function download(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)}
+async function doExport(){const z=await buildZip();if(!z)return;download(z.blob,z.name);toast("تم تجهيز "+z.name+" ("+z.count+" صورة)");$("exHint").textContent="الملف في التنزيلات (Downloads). ابعته للمسؤول أو ارفعه في الدرايف."}
+async function doShare(){
+  const z=await buildZip();if(!z)return;
+  const f=new File([z.blob],z.name,{type:"application/zip"});
+  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:z.name});return}}catch(e){if(e&&e.name==="AbortError")return}
+  download(z.blob,z.name);$("exHint").textContent="المشاركة المباشرة مش متاحة هنا، فنزّلت الملف في التنزيلات. ابعته من هناك.";toast("تم تنزيل الملف")
+}
+// ---- maps UI
+function renderMaps(){
+  const M=$("maps");M.innerHTML="";
+  Object.entries(maps).forEach(([pre,[sec,cat]])=>{const r=document.createElement("div");r.className="map";
+    r.innerHTML='<input readonly><span style="align-self:center">→</span><input readonly style="flex:1;width:auto"><button type="button" class="red" style="width:auto;margin:0;padding:8px 12px">×</button>';
+    const ins=r.querySelectorAll("input");ins[0].value=pre;ins[1].value=sec+" / "+cat;
+    r.querySelector("button").onclick=async()=>{delete maps[pre];await saveMaps();renderMaps()};M.appendChild(r)});
+}
+function init(){
+  fillSec();
+  $("sec").onchange=()=>fillCat();$("code").oninput=onCode;
+  $("btnCam").onclick=()=>$("fCam").click();$("btnPick").onclick=()=>$("fPick").click();
+  $("fCam").onchange=e=>{addFiles(e.target.files);e.target.value=""};$("fPick").onchange=e=>{addFiles(e.target.files);e.target.value=""};
+  $("btnSave").onclick=save;$("btnClear").onclick=clearPending;
+  $("btnExport").onclick=doExport;$("btnShare").onclick=doShare;
+  $("btnWipe").onclick=async function(){if(this.dataset.s!=="1"){this.dataset.s="1";this.textContent="تأكيد المسح؟ (تأكد إنك صدّرت)";return}await wipe();this.dataset.s="";this.textContent="مسح كل الصور من الجهاز بعد التصدير";render()};
+  $("btnAddMap").onclick=()=>toast("الربط بيتحفظ تلقائي لما تحفظ صور بكود جديد");
+  renderMaps();render();
+}
+openDB().catch(()=>{useMem=true}).then(loadMaps).then(init);
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+window.__app={normCode,validCode,buildZip,getAll};
+</script>
+</body>
+</html>
