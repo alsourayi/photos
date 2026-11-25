@@ -1,0 +1,1 @@
+{"name": "تطبيق الصور - المناديب", "short_name": "تطبيق الصور", "start_url": "./", "scope": "./", "display": "standalone", "lang": "ar", "dir": "rtl", "background_color": "#f4f1ea", "theme_color": "#1f4e3d", "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]}
