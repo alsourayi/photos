@@ -69,10 +69,46 @@ details summary{color:#6b675c;font-size:14px}
 (function(){function f(){var n=+(document.getElementById("sTot").textContent||0);var a=document.getElementById("statCard"),b=document.getElementById("listCard");if(a)a.style.display=n?"":"none";if(b)b.style.display=n?"":"none"}
 document.addEventListener("DOMContentLoaded",function(){f();new MutationObserver(f).observe(document.getElementById("sTot"),{childList:true,characterData:true,subtree:true})})})();
 </script>
+<style>
+body{padding-bottom:84px;background:#f4f1ea}
+header{position:static!important;padding:12px 16px 10px;display:grid;grid-template-columns:44px 1fr;column-gap:12px;align-items:center}
+header::before{content:"س";grid-row:1/3;width:44px;height:44px;border-radius:14px;background:var(--gold);color:#1b2e25;font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #00000030}
+header>*{margin:0}header h1{font-size:21px}
+
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:15;background:#fff;border-top:1px solid #e3ddc9;padding:6px 8px calc(6px + env(safe-area-inset-bottom));display:flex;gap:6px;box-shadow:0 -4px 14px #0001}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;margin:0;padding:6px 4px;border:0;border-radius:14px;background:transparent;color:#6b675c;font-size:13px;border-bottom:0!important}
+.tabs button b{font-size:22px;font-weight:400}
+.tabs button.on{background:#e8f1ec;color:var(--g);font-weight:800}
+#toast{bottom:92px}
+#viewGal>.card:first-child{position:sticky;top:0;z-index:6;border-radius:0 0 18px 18px;margin:-12px -12px 12px;padding:10px 12px 8px;box-shadow:0 4px 12px #1f4e3d1f}
+.sbar{display:flex;gap:8px}.sbar input{flex:1;border-radius:14px;background:#f6f3ec;border:1px solid #ddd5bf}
+.sbar .ic{width:48px;flex:none;margin:0;padding:0;font-size:20px;border-radius:14px;background:#e8f1ec;color:var(--g)}
+.seg{display:flex;background:#ece7d8;border-radius:14px;padding:3px;margin:8px 0}
+.seg button{flex:1;margin:0;padding:8px;border-radius:11px;font-size:15px;background:transparent;color:#5d5a50}
+.seg button:not(.sec){background:var(--g);color:#fff}
+.catchips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.catchips::-webkit-scrollbar{display:none}
+#catChips button{flex:none;width:auto;margin:0;padding:7px 12px;border-radius:20px;background:#fff;color:#3b3a33;border:1px solid #d9d2bb;font-size:14px;font-weight:600}
+#catChips button.on{background:var(--gold);border-color:var(--gold);color:#2b2208}
+#gStat,#refStat{font-size:12px;color:#8a8574;margin:2px 0 0}
+details.gc>summary{background:transparent;padding:6px 2px;font-size:16px;color:var(--g);border-bottom:2px solid var(--gold);border-radius:0;margin-bottom:8px}
+.grid{gap:8px;grid-template-columns:repeat(3,1fr)}
+@media(min-width:600px){.grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}main{max-width:900px!important}}
+.gi{border-radius:14px;box-shadow:0 2px 6px #0002;background:linear-gradient(100deg,#e6e1d3 30%,#f3efe4 50%,#e6e1d3 70%);background-size:200% 100%;animation:sh 1.3s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.gi span{background:linear-gradient(transparent,#000b);padding:14px 2px 4px;font-weight:700;font-size:12.5px}
+#ov{background:#050a08f2}
+#ov .cap{font-size:16px;color:#f1e6c0}
+#ov .row{position:fixed;bottom:0;left:0;right:0;max-width:none;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#0b1511;gap:10px;border-top:1px solid #ffffff1f}
+#ov .row button{margin:0;border-radius:14px;padding:14px;font-size:17px}
+#ovDl{flex:2;background:var(--gold);color:#2b2208;font-weight:800}
+#ovDrive button{background:#1f2f28;color:#fff}#ovClose{background:#1f2f28;color:#fff}
+#ov img{border-radius:12px;max-height:66dvh;box-shadow:0 8px 30px #000a}
+</style>
 </head>
 <body>
 <header><h1>السريع الدولية</h1><small>Alsourayi · تطبيق صور الأصناف</small></header>
-<div class="tabs"><button type="button" id="tabAdd" class="on">📷 إضافة</button><button type="button" id="tabGal">🖼️ الاستوديو <span id="galN"></span></button></div>
+<nav class="tabs"><button type="button" id="tabGal"><b>🖼️</b><span>الاستوديو <span id="galN"></span></span></button><button type="button" id="tabAdd" class="on"><b>📷</b><span>إضافة صور</span></button></nav>
 <main>
 <div id="viewAdd">
 <div class="card" id="addCard">
@@ -115,10 +151,10 @@ document.addEventListener("DOMContentLoaded",function(){f();new MutationObserver
 </div>
 <div id="viewGal" hidden>
 <div class="card">
-  <input id="gq" placeholder="ابحث بالكود (مثال 044 أو 0124)" inputmode="search">
-  <div class="chips"><button type="button" id="gAll" class="">الكل</button><button type="button" id="gHome" class="sec">منزلي</button><button type="button" id="gOff" class="sec">مكتبي</button></div>
+  <div class="sbar"><input id="gq" placeholder="🔍 ابحث بالكود (مثال 044 أو 0124)" inputmode="search"><button type="button" id="btnRef" class="ic" aria-label="تحديث المعرض">🔄</button></div>
+  <div class="seg"><button type="button" id="gAll" class="">الكل</button><button type="button" id="gHome" class="sec">منزلي</button><button type="button" id="gOff" class="sec">مكتبي</button></div><div id="catChips" class="catchips"></div>
   <div class="hint" id="gStat"></div>
-  <button type="button" id="btnRef" class="sec">🔄 تحديث المعرض</button><div class="hint" id="refStat"></div>
+  <div class="hint" id="refStat"></div>
   <button type="button" id="btnUp" class="sec" hidden>☁ رفع صوري المحلية للدرايف</button>
   <div class="hint" id="upStat"></div>
 </div>
@@ -284,7 +320,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v7.2 - 2026-11-26 10:00";
+let G={endpoint:"",items:[]},gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v8 - 2026-11-26 10:40";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
@@ -295,15 +331,19 @@ async function loadGallery(){
 }
 async function renderGallery(){
   const loc=[];
+  const cc={};G.items.filter(o=>!gSec||o.s===gSec).forEach(o=>cc[o.c]=(cc[o.c]||0)+1);if(gCat&&!cc[gCat])gCat="";
+  const cw=$("catChips");cw.innerHTML="";
+  const mk=(k,l,n)=>{const b=document.createElement("button");b.type="button";b.className=gCat===k?"on":"";b.textContent=l+" "+n;b.onclick=()=>{gCat=k;renderGallery();window.scrollTo(0,0)};cw.appendChild(b)};
+  mk("","الكل",G.items.filter(o=>!gSec||o.s===gSec).length);Object.keys(cc).sort((a,b)=>a.localeCompare(b,"ar")).forEach(k=>mk(k,k,cc[k]));
   const q=normDigits(gQ).toLowerCase().replace(/\s/g,"");
-  const match=o=>(!gSec||o.s===gSec)&&(!q||codeOf(o.n).toLowerCase().replace(/\s/g,"").includes(q)||o.c.includes(gQ.trim()));
+  const match=o=>(!gSec||o.s===gSec)&&(!gCat||o.c===gCat)&&(!q||codeOf(o.n).toLowerCase().replace(/\s/g,"").includes(q)||o.c.includes(gQ.trim()));
   const groups={};
   G.items.filter(match).forEach(o=>{const k=o.s+" / "+o.c;(groups[k]=groups[k]||[]).push({src:T[o.i]||thumbUrl(o.i,300),big:thumbUrl(o.i,1200),cap:codeOf(o.n)+" - "+o.c,id:o.i,label:codeOf(o.n)})});
   const lg=loc.filter(p=>(!gSec||p.sec===gSec)&&(!q||p.code.includes(q)));
   lg.forEach(p=>{const k=p.sec+" / "+p.cat;(groups[k]=groups[k]||[]).push({src:p.thumb,big:URL.createObjectURL(p.blob),cap:p.code+" - "+p.cat+" (محلي، لم يُرفع)",label:p.code,local:true})});
   const L=$("gList");L.innerHTML="";LIST=[];const keys=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
   let total=0;
-  keys.forEach(k=>{const d=document.createElement("details");d.className="gc";d.open=!!q||keys.length<=3;
+  keys.forEach(k=>{const d=document.createElement("details");d.className="gc";d.open=true;
     const s=document.createElement("summary");s.textContent=k+" ("+groups[k].length+")";d.appendChild(s);
     const g=document.createElement("div");g.className="grid";
     groups[k].forEach(it=>{total++;const c=document.createElement("div");c.className="gi"+(it.local?" loc":"");const im=document.createElement("img");im.alt=it.label;im.onerror=()=>{if(it.id&&!im.dataset.r){im.dataset.r=1;im.src=thumbUrl(it.id,300)}else{im.style.visibility="hidden";c.classList.add("err")}};im.src=it.src;c.appendChild(im);const sp=document.createElement("span");sp.textContent=it.label;c.appendChild(sp);LIST.push(it);c.onclick=()=>{IDX=LIST.indexOf(it);openOv(it)};g.appendChild(c)});
@@ -325,7 +365,7 @@ async function uploadAll(){
 }
 $("tabAdd").onclick=()=>setTab(false);$("tabGal").onclick=()=>setTab(true);
 $("gq").oninput=e=>{gQ=e.target.value;renderGallery()};
-[["gAll",""],["gHome","منزلي"],["gOff","مكتبي"]].forEach(([id,v])=>$(id).onclick=()=>{gSec=v;["gAll","gHome","gOff"].forEach(x=>$(x).className=x===id?"":"sec");renderGallery()});
+[["gAll",""],["gHome","منزلي"],["gOff","مكتبي"]].forEach(([id,v])=>$(id).onclick=()=>{gSec=v;gCat="";["gAll","gHome","gOff"].forEach(x=>$(x).className=x===id?"":"sec");renderGallery()});
 $("ovClose").onclick=()=>$("ov").style.display="none";$("ov").onclick=e=>{if(e.target.id==="ov")$("ov").style.display="none"};
 $("btnUp").onclick=uploadAll;
 
@@ -375,3 +415,4 @@ ov.addEventListener("touchend",e=>{const t=e.changedTouches[0];const dx=t.client
  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5&&Date.now()-t0<800){go(dx<0?1:-1)}},{passive:true});
 })();
 </script>
+<script>setTab(true);</script>
