@@ -64,7 +64,7 @@ button.link{background:none;color:var(--g2);border:0;text-decoration:underline;f
 .h2{font-weight:700;color:var(--g);margin-bottom:8px;font-size:17px}
 .stats{margin-bottom:0}.stats>div{background:#f1f6f3}
 details summary{color:#6b675c;font-size:14px}
-</style>
+#statCard,#listCard,#btnWipe{display:none!important}</style>
 <script>
 (function(){function f(){var n=+(document.getElementById("sTot").textContent||0);var a=document.getElementById("statCard"),b=document.getElementById("listCard");if(a)a.style.display=n?"":"none";if(b)b.style.display=n?"":"none"}
 document.addEventListener("DOMContentLoaded",function(){f();new MutationObserver(f).observe(document.getElementById("sTot"),{childList:true,characterData:true,subtree:true})})})();
@@ -284,7 +284,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v7.1 - 2026-11-26 09:30";
+let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v7.2 - 2026-11-26 10:00";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
@@ -294,7 +294,7 @@ async function loadGallery(){
   await renderGallery();
 }
 async function renderGallery(){
-  const loc=await getAll();
+  const loc=[];
   const q=normDigits(gQ).toLowerCase().replace(/\s/g,"");
   const match=o=>(!gSec||o.s===gSec)&&(!q||codeOf(o.n).toLowerCase().replace(/\s/g,"").includes(q)||o.c.includes(gQ.trim()));
   const groups={};
