@@ -261,13 +261,13 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v6.2 - 2026-11-26 08:20";
+let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v6.3 - 2026-11-26 08:25";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
   try{const r=await fetch("gallery.json?"+Date.now());G=await r.json()}catch(e){}
   if(G.endpoint){try{const r=await fetch(G.endpoint+"?action=list");const j=await r.json();if(j&&j.items){G.items=j.items;$("gStat").dataset.live="1"}}catch(e){}}
-  await Promise.all([1,2,3,4,5,6,7,8,9].map(async k=>{try{const r=await fetch("thumbs"+k+".json?v="+(G.updated||3));Object.assign(T,await r.json())}catch(e){}}));
+  await Promise.all([1,2,3,4,5,6,7,8,9,10].map(async k=>{try{const r=await fetch("thumbs"+k+".json?v="+(G.updated||3));Object.assign(T,await r.json())}catch(e){}}));
   await renderGallery();
 }
 async function renderGallery(){
