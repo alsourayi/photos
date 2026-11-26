@@ -136,6 +136,12 @@ details.gc>summary{background:transparent;padding:6px 2px;font-size:16px;color:v
   </div>
 </div>
 
+<div class="card" id="sendBox" style="display:none">
+  <div class="h2" id="sendMsg">صور محفوظة على جهازك</div>
+  <button type="button" id="btnSend" class="sec">📤 إرسال الصور</button>
+  <button type="button" id="btnSentOk" class="link" hidden>✔ تم الإرسال، امسح النسخة من جهازي</button>
+  <div class="hint" id="sendHint"></div>
+</div>
 <div class="card" id="statCard">
   <div class="stats"><div><b id="sTot">0</b>صورة</div><div><b id="sCat">0</b>فئة</div><div><b id="sCodes">0</b>كود</div></div>
   <button type="button" id="btnExport" hidden style="display:none">تصدير</button>
@@ -320,7 +326,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v8 - 2026-11-26 10:40";
+let G={endpoint:"",items:[]},gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v8.1 - 2026-11-26 10:30";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
@@ -415,4 +421,17 @@ ov.addEventListener("touchend",e=>{const t=e.changedTouches[0];const dx=t.client
  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5&&Date.now()-t0<800){go(dx<0?1:-1)}},{passive:true});
 })();
 </script>
-<script>setTab(true);</script>
+<script>
+(function(){const $$=id=>document.getElementById(id);
+function upd(){const n=+($$("sTot").textContent||0);$$("sendBox").style.display=n?"":"none";$$("sendMsg").textContent="عندك "+n+" صورة محفوظة على الجهاز";if(!n)$$("btnSentOk").hidden=true}
+new MutationObserver(upd).observe($$("sTot"),{childList:true,characterData:true,subtree:true});upd();
+$$("btnSend").onclick=async()=>{const b=$$("btnSend");b.disabled=true;
+ try{const loc=await getAll();if(!loc.length)return;const named=fileNames(loc);
+  const files=named.map(n=>new File([n.p.blob],n.path.split("/").pop(),{type:n.p.blob.type||"image/jpeg"}));
+  try{if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files,title:"صور الأصناف"});$$("btnSentOk").hidden=false;$$("sendHint").textContent="بعد ما تتأكد إن الصور وصلت، اضغط الزر الأخضر لمسحها من جهازك.";return}}catch(e){if(e&&e.name==="AbortError")return}
+  const z=await buildZip();if(z){download(z.blob,z.name);$$("sendHint").textContent="تم تنزيل ملف الصور في التنزيلات. ابعته من هناك، وبعدها امسح النسخة.";$$("btnSentOk").hidden=false}
+ }finally{b.disabled=false}};
+$$("btnSentOk").onclick=async()=>{await wipe();await render();$$("btnSentOk").hidden=true;$$("sendHint").textContent="تم مسح الصور من الجهاز."};
+})();
+setTab(true);
+</script>
