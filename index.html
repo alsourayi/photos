@@ -357,7 +357,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.3 - 2026-11-27_0025 10:10";
+let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.4 - 2026-11-27_0040 10:10";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
@@ -478,6 +478,43 @@ const rg=window.renderGallery;window.renderGallery=function(){S.clear();sel=fals
 upd();
 })();
 </script>
+<style>#ov img#ovImg{touch-action:none;transform-origin:0 0;will-change:transform;max-height:72dvh;user-select:none;-webkit-user-drag:none}#ovHint{color:#fffa;font-size:12px;margin-top:-4px}</style>
+<script>
+(function(){
+const img=document.getElementById("ovImg"),ov=document.getElementById("ov");
+let sc=1,tx=0,ty=0;window.__zm=false;
+function apply(){img.style.transform="translate("+tx+"px,"+ty+"px) scale("+sc+")";window.__zm=sc>1.02}
+function clampPan(){const w=img.offsetWidth*sc,h=img.offsetHeight*sc,W=img.offsetWidth,H=img.offsetHeight;
+  if(sc<=1){tx=0;ty=0;return}
+  const minx=Math.min(0,W-w),miny=Math.min(0,H-h);tx=Math.max(minx,Math.min(0,tx));ty=Math.max(miny,Math.min(0,ty))}
+function reset(){sc=1;tx=0;ty=0;img.style.transition="";apply()}
+function zoomAt(ns,cx,cy){ns=Math.max(1,Math.min(6,ns));const r=img.getBoundingClientRect();
+  const bx=(cx-r.left)/sc*1,by=(cy-r.top)/sc*1; // point in unscaled image coords relative to current origin
+  const ox=r.left-tx,oy=r.top-ty; // layout origin
+  tx=cx-ox-(cx-r.left)*(ns/sc);ty=cy-oy-(cy-r.top)*(ns/sc);sc=ns;clampPan();apply()}
+// full quality
+const oo=window.openOv;
+window.openOv=function(it){reset();oo(it);
+  if(it&&it.id&&!it.local){const u="https://lh3.googleusercontent.com/d/"+it.id+"=s3000";const pre=new Image();
+    pre.onload=()=>{if(curIt===it){img.src=u}};pre.src=u}};
+const P=new Map();let d0=0,s0=1,last=0,lx=0,ly=0,moved=false,sx=0,sy=0;
+img.addEventListener("pointerdown",e=>{img.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);moved=false;sx=e.clientX;sy=e.clientY;
+  if(P.size===2){const [a,b]=[...P.values()];d0=Math.hypot(a[0]-b[0],a[1]-b[1]);s0=sc;window.__zm=true}});
+img.addEventListener("pointermove",e=>{if(!P.has(e.pointerId))return;const prev=P.get(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);
+  if(P.size===2){const [a,b]=[...P.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(d0>0)zoomAt(s0*d/d0,(a[0]+b[0])/2,(a[1]+b[1])/2);moved=true}
+  else if(P.size===1&&sc>1){tx+=e.clientX-prev[0];ty+=e.clientY-prev[1];clampPan();apply();if(Math.hypot(e.clientX-sx,e.clientY-sy)>6)moved=true}});
+function up(e){P.delete(e.pointerId);
+  if(P.size===0){const wasMoved=moved;setTimeout(()=>{window.__zm=sc>1.02},0);
+    if(!wasMoved&&e.type==="pointerup"){const n=Date.now();
+      if(n-last<320&&Math.hypot(e.clientX-lx,e.clientY-ly)<40){if(sc>1.05){reset()}else{zoomAt(2.5,e.clientX,e.clientY)}last=0}else{last=n;lx=e.clientX;ly=e.clientY}}}
+  else if(P.size===1){const [a]=[...P.values()];sx=a[0];sy=a[1];moved=true}}
+img.addEventListener("pointerup",up);img.addEventListener("pointercancel",up);
+img.addEventListener("dblclick",e=>e.preventDefault());
+ov.addEventListener("wheel",e=>{if(ov.style.display!=="flex")return;e.preventDefault();zoomAt(sc*(e.deltaY<0?1.2:1/1.2),e.clientX,e.clientY)},{passive:false});
+const h=document.createElement("div");h.id="ovHint";h.textContent="اضغط مرتين أو افتح بإصبعين للتكبير";ov.insertBefore(h,document.getElementById("ovCap"));
+window.__ovZoom={get:()=>({sc,tx,ty}),reset};
+})();
+</script>
 </body>
 </html>
 <script>
@@ -518,7 +555,7 @@ document.addEventListener("keydown",e=>{if(ov.style.display!=="flex")return;
 let sx=0,sy=0,t0=0;
 ov.addEventListener("touchstart",e=>{if(e.touches.length!==1)return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;t0=Date.now()},{passive:true});
 ov.addEventListener("touchend",e=>{const t=e.changedTouches[0];const dx=t.clientX-sx,dy=t.clientY-sy;
- if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5&&Date.now()-t0<800){go(dx<0?1:-1)}},{passive:true});
+ if(!window.__zm&&Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5&&Date.now()-t0<800){go(dx<0?1:-1)}},{passive:true});
 })();
 </script>
 <script>
