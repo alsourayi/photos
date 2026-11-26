@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded",function(){f();new MutationObserver
 <div class="card" id="statCard">
   <div class="stats"><div><b id="sTot">0</b>صورة</div><div><b id="sCat">0</b>فئة</div><div><b id="sCodes">0</b>كود</div></div>
   <button type="button" id="btnExport" hidden style="display:none">تصدير</button>
-  <button type="button" id="btnShare" class="link">📤 مشاركة صوري (واتساب / درايف)</button>
+  <button type="button" id="btnShare" hidden style="display:none">x</button>
   <div class="hint" id="exHint"></div>
 </div>
 
@@ -284,7 +284,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v7 - 2026-11-26 09:20";
+let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v7.1 - 2026-11-26 09:30";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
