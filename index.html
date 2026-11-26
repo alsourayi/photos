@@ -46,7 +46,18 @@ details.gc{margin-bottom:10px}details.gc>summary{font-weight:800;background:#e5e
 #ov{position:fixed;inset:0;padding-bottom:env(safe-area-inset-bottom);background:#000d;z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;padding:12px}
 #ov img{max-width:100%;max-height:70vh;max-height:65dvh;border-radius:8px}#ov .cap{color:#fff;margin:10px;font-size:18px;text-align:center}
 #ov .row{width:100%;max-width:420px}
-.gi.err{background:#eee;min-height:90px}.gi.err::before{content:"📷";display:block;text-align:center;font-size:28px;padding-top:20px}#ov .nav{direction:ltr;unicode-bidi:isolate;position:absolute;top:36%;width:46px;height:46px;border-radius:50%;margin:0;padding:0;background:#000a;color:#fff;font-size:22px;border:1px solid #fff6;z-index:2}#ov{touch-action:pan-y}</style>
+.gi.err{background:#eee;min-height:90px}.gi.err::before{content:"📷";display:block;text-align:center;font-size:28px;padding-top:20px}#ov .nav{direction:ltr;unicode-bidi:isolate;position:absolute;top:36%;width:46px;height:46px;border-radius:50%;margin:0;padding:0;background:#000a;color:#fff;font-size:22px;border:1px solid #fff6;z-index:2}#ov{touch-action:pan-y}.cgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+@media(min-width:700px){.cgrid{grid-template-columns:repeat(4,1fr)}}
+.cc{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px #1f4e3d22;cursor:pointer}
+.cc img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#eee}
+.cn{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;color:#1f4e3d}.cn i{font-style:normal;background:#c9a24a;color:#fff;border-radius:10px;padding:1px 8px;font-size:13px}
+.sech{font-weight:700;color:#1f4e3d;margin:10px 2px 8px}
+.backbar{display:flex;align-items:center;gap:10px;margin:6px 0 10px}.backbar button{background:#1f4e3d;color:#fff;border:0;border-radius:12px;padding:8px 14px;font-size:15px}
+#ownerBar{display:flex;gap:8px;align-items:center;margin:6px 0}#ownerBar[hidden]{display:none}#ownerBar span{color:#b3261e;font-weight:700}
+#ownM{position:fixed;inset:0;background:#000b;z-index:50;display:flex;align-items:center;justify-content:center;padding:14px}#ownM>div{background:#fff;border-radius:16px;padding:16px;width:100%;max-width:420px;max-height:85vh;overflow:auto}
+#ownM input{width:100%;padding:12px;font-size:16px;border:1px solid #ccc;border-radius:10px;margin:8px 0}
+.trow{display:flex;align-items:center;gap:8px;margin:6px 0}.trow img{width:44px;height:44px;object-fit:cover;border-radius:8px}.trow span{flex:1}
+</style>
 <style>
 :root{--g:#1f4e3d;--g2:#2e6b55;--gold:#c9a24a;--bg:#f6f3ec}
 body{background:var(--bg)}
@@ -158,16 +169,18 @@ details.gc>summary{background:transparent;padding:6px 2px;font-size:16px;color:v
 <div id="viewGal" hidden>
 <div class="card">
   <div class="sbar"><input id="gq" placeholder="🔍 ابحث بالكود (مثال 044 أو 0124)" inputmode="search"><button type="button" id="btnRef" class="ic" aria-label="تحديث المعرض">🔄</button></div>
-  <div class="seg"><button type="button" id="gAll" class="">الكل</button><button type="button" id="gHome" class="sec">منزلي</button><button type="button" id="gOff" class="sec">مكتبي</button></div><div id="catChips" class="catchips"></div>
+  <div class="seg"><button type="button" id="gAll" class="">الكل</button><button type="button" id="gHome" class="sec">منزلي</button><button type="button" id="gOff" class="sec">مكتبي</button></div><div id="catChips" class="catchips" hidden></div>
   <div class="hint" id="gStat"></div>
+  <div id="ownerBar" hidden><span>🔓 وضع المالك</span><button type="button" id="btnTrash" class="sec">المحذوفات (<span id="trashN">0</span>)</button><button type="button" id="btnOwnerOff" class="sec">خروج</button></div>
   <div class="hint" id="refStat"></div>
   <button type="button" id="btnUp" class="sec" hidden>☁ رفع صوري المحلية للدرايف</button>
   <div class="hint" id="upStat"></div>
 </div>
+<div id="backBar" class="backbar" hidden><button type="button" id="btnBack">→ رجوع</button><b id="backTitle"></b></div>
 <div id="gList"></div>
 </div>
 </main>
-<div id="ov"><button type="button" id="ovNext" class="nav" aria-label="التالي" style="left:8px">❮</button><button type="button" id="ovPrev" class="nav" aria-label="السابق" style="right:8px">❯</button><img id="ovImg" alt=""><div class="cap" id="ovCap"></div><div class="row"><button type="button" id="ovDl">⬇ تحميل</button><a id="ovDrive" target="_blank" rel="noopener"><button type="button" class="sec">فتح في الدرايف</button></a><button type="button" id="ovClose">إغلاق</button></div></div>
+<div id="ov"><button type="button" id="ovNext" class="nav" aria-label="التالي" style="left:8px">❮</button><button type="button" id="ovPrev" class="nav" aria-label="السابق" style="right:8px">❯</button><img id="ovImg" alt=""><div class="cap" id="ovCap"></div><div class="row"><button type="button" id="ovDl">⬇ تحميل</button><a id="ovDrive" target="_blank" rel="noopener"><button type="button" class="sec">فتح في الدرايف</button></a><button type="button" id="ovDel" hidden style="background:#b3261e;color:#fff">🗑 حذف</button><button type="button" id="ovClose">إغلاق</button></div></div>
 <div id="toast"></div>
 <script>
 "use strict";
@@ -326,39 +339,56 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v8.2 - 2026-11-26 10:10";
+let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v9 - 2026-11-26_1020 10:10";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
   try{const r=await fetch("gallery.json?"+Date.now());G=await r.json()}catch(e){}
   if(G.endpoint){try{const r=await fetch(G.endpoint+"?action=list");const j=await r.json();if(j&&j.items){G.items=j.items;$("gStat").dataset.live="1"}}catch(e){}}
+  try{const r=await fetch("hidden.json?"+Date.now());const j=await r.json();HIDL=j.items||[];HID=new Set(HIDL.map(x=>x.i))}catch(e){}
   await Promise.all([1,2,3,4,5,6,7,8,9,10,11].map(async k=>{try{const r=await fetch("thumbs"+k+".json?v="+(G.updated||3));Object.assign(T,await r.json())}catch(e){}}));
   await renderGallery();
 }
 async function renderGallery(){
-  const loc=[];
-  const cc={};G.items.filter(o=>!gSec||o.s===gSec).forEach(o=>cc[o.c]=(cc[o.c]||0)+1);if(gCat&&!cc[gCat])gCat="";
-  const cw=$("catChips");cw.innerHTML="";
-  const mk=(k,l,n)=>{const b=document.createElement("button");b.type="button";b.className=gCat===k?"on":"";b.textContent=l+" "+n;b.onclick=()=>{gCat=k;renderGallery();window.scrollTo(0,0)};cw.appendChild(b)};
-  mk("","الكل",G.items.filter(o=>!gSec||o.s===gSec).length);Object.keys(cc).sort((a,b)=>a.localeCompare(b,"ar")).forEach(k=>mk(k,k,cc[k]));
+  const vis=G.items.filter(o=>!HID.has(o.i));
   const q=normDigits(gQ).toLowerCase().replace(/\s/g,"");
-  const match=o=>(!gSec||o.s===gSec)&&(!gCat||o.c===gCat)&&(!q||codeOf(o.n).toLowerCase().replace(/\s/g,"").includes(q)||o.c.includes(gQ.trim()));
-  const groups={};
-  G.items.filter(match).forEach(o=>{const k=o.s+" / "+o.c;(groups[k]=groups[k]||[]).push({src:T[o.i]||thumbUrl(o.i,300),big:thumbUrl(o.i,1200),cap:codeOf(o.n)+" - "+o.c,id:o.i,label:codeOf(o.n)})});
-  const lg=loc.filter(p=>(!gSec||p.sec===gSec)&&(!q||p.code.includes(q)));
-  lg.forEach(p=>{const k=p.sec+" / "+p.cat;(groups[k]=groups[k]||[]).push({src:p.thumb,big:URL.createObjectURL(p.blob),cap:p.code+" - "+p.cat+" (محلي، لم يُرفع)",label:p.code,local:true})});
-  const L=$("gList");L.innerHTML="";LIST=[];const keys=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
-  let total=0;
-  keys.forEach(k=>{const d=document.createElement("details");d.className="gc";d.open=true;
-    const s=document.createElement("summary");s.textContent=k+" ("+groups[k].length+")";d.appendChild(s);
-    const g=document.createElement("div");g.className="grid";
-    groups[k].forEach(it=>{total++;const c=document.createElement("div");c.className="gi"+(it.local?" loc":"");const im=document.createElement("img");im.alt=it.label;im.onerror=()=>{if(it.id&&!im.dataset.r){im.dataset.r=1;im.src=thumbUrl(it.id,300)}else{im.style.visibility="hidden";c.classList.add("err")}};im.src=it.src;c.appendChild(im);const sp=document.createElement("span");sp.textContent=it.label;c.appendChild(sp);LIST.push(it);c.onclick=()=>{IDX=LIST.indexOf(it);openOv(it)};g.appendChild(c)});
-    d.appendChild(g);L.appendChild(d)});
-  if(!total)L.innerHTML='<div class="card hint">لا توجد نتائج.</div>';
-  $("gStat").textContent=G.items.length+" صنف في الدرايف"+(loc.length?" + "+loc.length+" محلي":"")+(G.endpoint?" (مباشر)":" (آخر تحديث من الدرايف)");
-  $("galN").textContent="("+(G.items.length+loc.length)+")";
-  $("btnUp").hidden=!(G.endpoint&&loc.length);
+  const inSec=o=>!gSec||o.s===gSec;
+  const L=$("gList");L.innerHTML="";LIST=[];$("catChips").innerHTML="";
+  const bb=$("backBar");
+  const src=o=>T[o.i]||thumbUrl(o.i,300);
+  const mkItem=o=>({src:src(o),big:thumbUrl(o.i,1200),cap:codeOf(o.n)+" - "+o.c,id:o.i,label:codeOf(o.n),name:o.n,cat:o.c,sec:o.s});
+  if(!q&&!gCat){
+    bb.hidden=true;
+    const by={};vis.filter(inSec).forEach(o=>{((by[o.s]=by[o.s]||{})[o.c]=by[o.s][o.c]||[]).push(o)});
+    ["منزلي","مكتبي"].concat(Object.keys(by).filter(x=>x!=="منزلي"&&x!=="مكتبي")).forEach(sec=>{if(!by[sec])return;
+      const cats=Object.keys(by[sec]).sort((a,b)=>a.localeCompare(b,"ar"));const tot=cats.reduce((n,c)=>n+by[sec][c].length,0);
+      const h=document.createElement("div");h.className="sech";h.textContent=sec+" ("+tot+")";L.appendChild(h);
+      const g=document.createElement("div");g.className="cgrid";
+      cats.forEach(c=>{const arr=by[sec][c];const d=document.createElement("div");d.className="cc";
+        const im=document.createElement("img");im.alt=c;im.src=src(arr[0]);d.appendChild(im);
+        const n=document.createElement("div");n.className="cn";n.innerHTML="<b></b><i></i>";n.firstChild.textContent=c;n.lastChild.textContent=arr.length;d.appendChild(n);
+        d.onclick=()=>{gCat=c;gCatS=sec;history.pushState({g:1},"");renderGallery();window.scrollTo(0,0)};g.appendChild(d)});
+      L.appendChild(g)});
+    if(!L.firstChild)L.innerHTML='<div class="card hint">لا توجد فئات.</div>';
+  }else{
+    const m=vis.filter(o=>inSec(o)&&(!gCat||(o.c===gCat&&(!gCatS||o.s===gCatS)))&&(!q||codeOf(o.n).toLowerCase().replace(/\s/g,"").includes(q)||o.c.includes(gQ.trim())));
+    bb.hidden=false;$("backTitle").textContent=(gCat?gCat+" ":"نتائج البحث ")+"("+m.length+")";
+    const groups={};m.forEach(o=>{const k=gCat?"":o.s+" / "+o.c;(groups[k]=groups[k]||[]).push(mkItem(o))});
+    Object.keys(groups).sort((a,b)=>a.localeCompare(b,"ar")).forEach(k=>{
+      const wrap=document.createElement("div");wrap.className="gc";
+      if(k){const s2=document.createElement("div");s2.className="sech";s2.textContent=k+" ("+groups[k].length+")";wrap.appendChild(s2)}
+      const g=document.createElement("div");g.className="grid";
+      groups[k].forEach(it=>{const c=document.createElement("div");c.className="gi";const im=document.createElement("img");im.alt=it.label;im.onerror=()=>{if(it.id&&!im.dataset.r){im.dataset.r=1;im.src=thumbUrl(it.id,300)}else{im.style.visibility="hidden";c.classList.add("err")}};im.src=it.src;c.appendChild(im);const sp=document.createElement("span");sp.textContent=it.label;c.appendChild(sp);LIST.push(it);c.onclick=()=>{IDX=LIST.indexOf(it);openOv(it)};g.appendChild(c)});
+      wrap.appendChild(g);L.appendChild(wrap)});
+    if(!m.length)L.innerHTML='<div class="card hint">لا توجد نتائج.</div>';
+  }
+  $("gStat").textContent=vis.length+" صنف";
+  $("galN").textContent="("+vis.length+")";
+  $("btnUp").hidden=true;
+  const ob=$("ownerBar");if(ob){ob.hidden=!OWNER;$("trashN").textContent=HIDL.length}
 }
+function goBack(){if(history.state&&history.state.g){history.back()}else{gCat="";gCatS="";gQ="";$("gq").value="";renderGallery()}}
+window.addEventListener("popstate",()=>{gCat="";gCatS="";gQ="";$("gq").value="";renderGallery()});
 let curIt=null,curBlobP=null;const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);function openOv(it){curIt=it;curBlobP=null;if(IOS&&it.id){curBlobP=fetch("https://lh3.googleusercontent.com/d/"+it.id+"=s0").then(r=>{if(!r.ok)throw 1;return r.blob()}).catch(()=>null)}$("ovDl").textContent="⬇ تحميل";$("ovImg").onerror=()=>{if(it.id&&!$("ovImg").dataset.r){$("ovImg").dataset.r=1;$("ovImg").src=it.src}};delete $("ovImg").dataset.r;$("ovImg").src=it.big;$("ovCap").textContent=it.cap+(LIST.length>1?"  ("+(IDX+1)+"/"+LIST.length+")":"");const a=$("ovDrive");if(it.id){a.href="https://drive.google.com/file/d/"+it.id+"/view";a.hidden=false}else a.hidden=true;$("ov").style.display="flex"}
 function setTab(g){$("viewAdd").hidden=g;$("viewGal").hidden=!g;$("tabAdd").classList.toggle("on",!g);$("tabGal").classList.toggle("on",g);if(g)renderGallery()}
 function blobB64(b){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(String(f.result).split(",")[1]);f.readAsDataURL(b)})}
@@ -434,4 +464,54 @@ $$("btnSend").onclick=async()=>{const b=$$("btnSend");b.disabled=true;
 $$("btnSentOk").onclick=async()=>{await wipe();await render();$$("btnSentOk").hidden=true;$$("sendHint").textContent="تم مسح الصور من الجهاز."};
 })();
 setTab(true);
+
+// ===== owner mode =====
+const OW={fails:0,until:0,tok:null,taps:0,t0:0};
+const b64d=x=>Uint8Array.from(atob(x),c=>c.charCodeAt(0));
+async function ownUnlock(code){
+  if(Date.now()<OW.until)throw new Error("انتظر قليلا");
+  const o=await (await fetch("owner.json?"+Date.now())).json();
+  const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(code),"PBKDF2",false,["deriveBits"]);
+  const k=new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:b64d(o.s),iterations:o.i},km,512));
+  const hk=n=>crypto.subtle.importKey("raw",k.slice(n,n+32),{name:"HMAC",hash:"SHA-256"},false,["sign","verify"]);
+  const nonce=b64d(o.n),ct=b64d(o.c),mk=await hk(32);
+  const cat=new Uint8Array(nonce.length+ct.length);cat.set(nonce);cat.set(ct,nonce.length);
+  if(!(await crypto.subtle.verify("HMAC",mk,b64d(o.t),cat))){OW.fails++;if(OW.fails>=3){OW.until=Date.now()+60000;OW.fails=0}throw new Error("الكود غير صحيح")}
+  const ek=await hk(0);let ks=new Uint8Array(0),c=0;
+  while(ks.length<ct.length){const m=new Uint8Array(nonce.length+4);m.set(nonce);new DataView(m.buffer).setUint32(nonce.length,c++);const d=new Uint8Array(await crypto.subtle.sign("HMAC",ek,m));const n=new Uint8Array(ks.length+32);n.set(ks);n.set(d,ks.length);ks=n}
+  OW.fails=0;OW.tok=new TextDecoder().decode(ct.map((v,i)=>v^ks[i]));
+}
+const API="https://api.github.com/repos/alsarie-intl-catalog/photos/contents/hidden.json";
+async function ownSave(mut){
+  for(let a=0;a<4;a++){
+    const h={Authorization:"Bearer "+OW.tok,Accept:"application/vnd.github+json"};
+    const r=await fetch(API+"?ref=main&t="+Date.now(),{headers:h,cache:"no-store"});if(!r.ok)throw new Error("GET "+r.status);
+    const j=await r.json();let cur={items:[]};try{cur=JSON.parse(new TextDecoder().decode(b64d(j.content.replace(/\n/g,""))))}catch(e){}
+    cur.items=mut(cur.items||[]);
+    const body=btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(cur))));
+    const p=await fetch(API,{method:"PUT",headers:h,body:JSON.stringify({message:"owner: update hidden",content:body,sha:j.sha,branch:"main"})});
+    if(p.ok){HIDL=cur.items;HID=new Set(HIDL.map(x=>x.i));return}
+    if(p.status!==409&&p.status!==422)throw new Error("PUT "+p.status)}
+  throw new Error("تعذر الحفظ");
+}
+function modal(html){let m=$("ownM");if(!m){m=document.createElement("div");m.id="ownM";document.body.appendChild(m)}m.innerHTML="<div>"+html+"</div>";m.style.display="flex";return m}
+function mclose(){const m=$("ownM");if(m)m.style.display="none"}
+function ownAsk(){
+  const m=modal('<b>وضع المالك</b><input id="ownC" type="password" autocomplete="off" placeholder="الكود"><div id="ownE" style="color:#b3261e"></div><button type="button" id="ownGo">دخول</button> <button type="button" class="sec" id="ownX">إلغاء</button>');
+  $("ownX").onclick=mclose;
+  $("ownGo").onclick=async()=>{$("ownE").textContent="...";try{await ownUnlock($("ownC").value.trim().toUpperCase());mclose();ownOn()}catch(e){$("ownE").textContent=e.message}}
+}
+function ownOn(){OWNER=true;$("ovDel").hidden=false;renderGallery()}
+function ownOff(){OWNER=false;OW.tok=null;$("ovDel").hidden=true;renderGallery()}
+document.querySelector("header h1").addEventListener("click",()=>{const n=Date.now();if(n-OW.t0>2500)OW.taps=0;OW.t0=n;if(++OW.taps>=5){OW.taps=0;OWNER?null:ownAsk()}});
+$("btnOwnerOff").onclick=ownOff;
+$("ovDel").onclick=()=>{const it=curIt;if(!it||!it.id||!OW.tok)return;
+  const m=modal('<b>حذف الصورة '+it.label+'؟</b><p>ستختفي من المعرض للجميع. (تبقى في الدرايف)</p><div id="ownE" style="color:#b3261e"></div><button type="button" id="dY" style="background:#b3261e;color:#fff">نعم احذف</button> <button type="button" class="sec" id="dN">إلغاء</button>');
+  $("dN").onclick=mclose;
+  $("dY").onclick=async()=>{$("dY").disabled=true;$("ownE").textContent="جاري الحذف...";try{await ownSave(l=>l.some(x=>x.i===it.id)?l:l.concat([{i:it.id,n:it.name||it.label,c:it.cat||"",s:it.sec||""}]));mclose();$("ov").style.display="none";renderGallery()}catch(e){$("ownE").textContent="فشل: "+e.message}}};
+$("btnTrash").onclick=()=>{
+  const m=modal('<b>المحذوفات</b><div id="trL"></div><button type="button" class="sec" id="trX">إغلاق</button>');$("trX").onclick=mclose;
+  const L=$("trL");if(!HIDL.length)L.textContent="لا توجد صور محذوفة.";
+  HIDL.forEach(x=>{const r=document.createElement("div");r.className="trow";const im=document.createElement("img");im.src=T[x.i]||thumbUrl(x.i,100);r.appendChild(im);const sp=document.createElement("span");sp.textContent=(x.n||x.i)+" "+(x.c||"");r.appendChild(sp);const b=document.createElement("button");b.type="button";b.textContent="استرجاع";b.onclick=async()=>{b.disabled=true;try{await ownSave(l=>l.filter(y=>y.i!==x.i));r.remove();renderGallery()}catch(e){b.textContent="فشل"}};r.appendChild(b);L.appendChild(r)})};
+$("btnBack").onclick=goBack;
 </script>
