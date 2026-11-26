@@ -261,7 +261,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v6.3 - 2026-11-26 08:25";
+let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v6.4 - 2026-11-26 08:30";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
