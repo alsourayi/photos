@@ -47,16 +47,39 @@ details.gc{margin-bottom:10px}details.gc>summary{font-weight:800;background:#e5e
 #ov img{max-width:100%;max-height:70vh;max-height:65dvh;border-radius:8px}#ov .cap{color:#fff;margin:10px;font-size:18px;text-align:center}
 #ov .row{width:100%;max-width:420px}
 .gi.err{background:#eee;min-height:90px}.gi.err::before{content:"📷";display:block;text-align:center;font-size:28px;padding-top:20px}#ov .nav{direction:ltr;unicode-bidi:isolate;position:absolute;top:36%;width:46px;height:46px;border-radius:50%;margin:0;padding:0;background:#000a;color:#fff;font-size:22px;border:1px solid #fff6;z-index:2}#ov{touch-action:pan-y}</style>
+<style>
+:root{--g:#1f4e3d;--g2:#2e6b55;--gold:#c9a24a;--bg:#f6f3ec}
+body{background:var(--bg)}
+header{background:linear-gradient(135deg,#183e31,#2e6b55);border-bottom:3px solid var(--gold);padding-bottom:12px}
+header h1{font-size:24px;letter-spacing:0}header small{display:block;margin-top:2px;color:#e8d9a8;opacity:1;font-size:14px}
+.card{border-radius:18px;box-shadow:0 2px 10px #1f4e3d14}
+.steps{display:flex;align-items:center;justify-content:center;gap:8px;color:#5d5a50;font-size:14px;margin:2px 0 12px}
+.steps span{background:#f1ecdc;border-radius:20px;padding:4px 10px}.steps i{font-style:normal;color:var(--gold);font-size:18px}
+.row.big{gap:12px}.row.big button{min-height:128px;border-radius:20px;font-size:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;margin:0}
+.row.big button b{font-size:40px;font-weight:400}
+#btnCam{background:var(--g);box-shadow:0 4px 0 #14362a}
+#btnPick{background:#fff;color:var(--g);border:2px solid var(--g)}
+button.link{background:none;color:var(--g2);border:0;text-decoration:underline;font-weight:600;font-size:15px;margin-top:8px}
+#btnSave{background:var(--gold);color:#2b2208;font-size:19px;padding:15px;border-radius:14px}
+.h2{font-weight:700;color:var(--g);margin-bottom:8px;font-size:17px}
+.stats{margin-bottom:0}.stats>div{background:#f1f6f3}
+details summary{color:#6b675c;font-size:14px}
+</style>
+<script>
+(function(){function f(){var n=+(document.getElementById("sTot").textContent||0);var a=document.getElementById("statCard"),b=document.getElementById("listCard");if(a)a.style.display=n?"":"none";if(b)b.style.display=n?"":"none"}
+document.addEventListener("DOMContentLoaded",function(){f();new MutationObserver(f).observe(document.getElementById("sTot"),{childList:true,characterData:true,subtree:true})})})();
+</script>
 </head>
 <body>
-<header><h1>📷 تطبيق الصور</h1><small>السريع الدولية | Alsourayi - صوّر الصنف، اكتب الكود، والتصنيف تلقائي</small></header>
+<header><h1>السريع الدولية</h1><small>Alsourayi · تطبيق صور الأصناف</small></header>
 <div class="tabs"><button type="button" id="tabAdd" class="on">📷 إضافة</button><button type="button" id="tabGal">🖼️ الاستوديو <span id="galN"></span></button></div>
 <main>
 <div id="viewAdd">
 <div class="card" id="addCard">
-  <div class="row">
-    <button type="button" id="btnCam">📸 تصوير</button>
-    <button type="button" id="btnPick" class="sec">🖼️ من المعرض</button>
+  <div class="steps"><span>١ صوّر</span><i>›</i><span>٢ اكتب الكود</span><i>›</i><span>٣ احفظ</span></div>
+  <div class="row big">
+    <button type="button" id="btnCam"><b>📸</b>تصوير</button>
+    <button type="button" id="btnPick" class="sec"><b>🖼️</b>من المعرض</button>
   </div>
   <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
   <input type="file" id="fPick" accept="image/*" multiple hidden>
@@ -77,16 +100,16 @@ details.gc{margin-bottom:10px}details.gc>summary{font-weight:800;background:#e5e
   </div>
 </div>
 
-<div class="card">
+<div class="card" id="statCard">
   <div class="stats"><div><b id="sTot">0</b>صورة</div><div><b id="sCat">0</b>فئة</div><div><b id="sCodes">0</b>كود</div></div>
-  <button type="button" id="btnExport">⬇ تصدير الكل (ملف ZIP مرتب بالفئات)</button>
-  <button type="button" id="btnShare" class="sec">📤 مشاركة (واتساب / درايف)</button>
+  <button type="button" id="btnExport" hidden style="display:none">تصدير</button>
+  <button type="button" id="btnShare" class="link">📤 مشاركة صوري (واتساب / درايف)</button>
   <div class="hint" id="exHint"></div>
 </div>
 
-<div class="card"><div id="list"></div><button type="button" id="btnWipe" class="red" hidden>مسح كل الصور من الجهاز بعد التصدير</button></div>
+<div class="card" id="listCard"><div class="h2">صوري المحفوظة على الجهاز</div><div id="list"></div><button type="button" id="btnWipe" class="red" hidden>مسح كل الصور المحفوظة</button></div>
 
-<div class="card"><details><summary>⚙ ربط أول 3 أرقام من الكود بالفئة</summary>
+<div class="card" id="mapCard"><details><summary>⚙ إعدادات: ربط بادئة الكود بالفئة</summary>
 <div class="hint">لو الكود يبدأ بـ 041 يتصنف تلقائي. أي بادئة جديدة اختار لها فئة مرة واحدة وهتتحفظ.</div>
 <div id="maps"></div><button type="button" id="btnAddMap" class="sec">+ إضافة ربط</button></details></div>
 </div>
@@ -253,7 +276,7 @@ function init(){
   $("fCam").onchange=e=>{addFiles(e.target.files);e.target.value=""};$("fPick").onchange=e=>{addFiles(e.target.files);e.target.value=""};
   $("btnSave").onclick=save;$("btnClear").onclick=clearPending;
   $("btnExport").onclick=doExport;$("btnShare").onclick=doShare;
-  $("btnWipe").onclick=async function(){if(this.dataset.s!=="1"){this.dataset.s="1";this.textContent="تأكيد المسح؟ (تأكد إنك صدّرت)";return}await wipe();this.dataset.s="";this.textContent="مسح كل الصور من الجهاز بعد التصدير";render()};
+  $("btnWipe").onclick=async function(){if(this.dataset.s!=="1"){this.dataset.s="1";this.textContent="تأكيد المسح؟ (ما تقدر ترجعها)";return}await wipe();this.dataset.s="";this.textContent="مسح كل الصور من الجهاز بعد التصدير";render()};
   $("btnAddMap").onclick=()=>toast("الربط بيتحفظ تلقائي لما تحفظ صور بكود جديد");
   renderMaps();render();
 }
@@ -261,7 +284,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v6.4 - 2026-11-26 08:30";
+let G={endpoint:"",items:[]},gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v7 - 2026-11-26 09:20";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
