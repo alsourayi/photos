@@ -198,7 +198,7 @@ header{padding:4px 8px 4px!important}
 <div id="gList"></div>
 </div>
 </main>
-<div id="ov"><button type="button" id="ovNext" class="nav" aria-label="التالي" style="left:8px">❮</button><button type="button" id="ovPrev" class="nav" aria-label="السابق" style="right:8px">❯</button><img id="ovImg" alt=""><div class="cap" id="ovCap"></div><div class="row"><button type="button" id="ovDl">⬇ تحميل</button><a id="ovDrive" target="_blank" rel="noopener"><button type="button" class="sec">فتح في الدرايف</button></a><button type="button" id="ovDel" hidden style="background:#b3261e;color:#fff">🗑 حذف</button><button type="button" id="ovClose">إغلاق</button></div></div>
+<div id="ov"><button type="button" id="ovNext" class="nav" aria-label="التالي" style="left:8px">❮</button><button type="button" id="ovPrev" class="nav" aria-label="السابق" style="right:8px">❯</button><img id="ovImg" alt=""><div class="cap" id="ovCap"></div><div class="row"><button type="button" id="ovShare" style="background:#25a244;color:#fff">💬 مشاركة واتساب</button><button type="button" id="ovDl">⬇ تحميل</button><a id="ovDrive" target="_blank" rel="noopener"><button type="button" class="sec">فتح في الدرايف</button></a><button type="button" id="ovDel" hidden style="background:#b3261e;color:#fff">🗑 حذف</button><button type="button" id="ovClose">إغلاق</button></div></div>
 <div id="toast"></div>
 <script>
 "use strict";
@@ -357,7 +357,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11 - 2026-11-26_1350 10:10";
+let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.1 - 2026-11-27_0015 10:10";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
@@ -400,7 +400,7 @@ async function renderGallery(){
       const wrap=document.createElement("div");wrap.className="gc";
       if(k){const s2=document.createElement("div");s2.className="sech";s2.textContent=k+" ("+groups[k].length+")";wrap.appendChild(s2)}
       const g=document.createElement("div");g.className="grid";
-      groups[k].forEach(it=>{const c=document.createElement("div");c.className="gi";const im=document.createElement("img");im.alt=it.label;im.onerror=()=>{if(it.id&&!im.dataset.r){im.dataset.r=1;im.src=thumbUrl(it.id,300)}else{im.style.visibility="hidden";c.classList.add("err")}};im.src=it.src;c.appendChild(im);const sp=document.createElement("span");sp.textContent=it.label;c.appendChild(sp);LIST.push(it);c.onclick=()=>{IDX=LIST.indexOf(it);openOv(it)};g.appendChild(c)});
+      groups[k].forEach(it=>{const c=document.createElement("div");c.className="gi";const im=document.createElement("img");im.alt=it.label;im.onerror=()=>{if(it.id&&!im.dataset.r){im.dataset.r=1;im.src=thumbUrl(it.id,300)}else{im.style.visibility="hidden";c.classList.add("err")}};im.src=it.src;c.appendChild(im);const sp=document.createElement("span");sp.textContent=it.label;c.appendChild(sp);LIST.push(it);c._it=it;c.onclick=()=>{IDX=LIST.indexOf(it);openOv(it)};g.appendChild(c)});
       wrap.appendChild(g);L.appendChild(wrap)});
     if(!m.length)L.innerHTML='<div class="card hint">'+(gCat?"لا توجد صور في هذه الفئة حاليا.":"لا توجد نتائج.")+'</div>';
   }
@@ -430,6 +430,54 @@ $("btnUp").onclick=uploadAll;
 window.__app={normCode,validCode,buildZip,getAll};
 </script>
 <div style="text-align:center;color:#888;font-size:12px;padding:14px" id="verLine"></div><script>document.getElementById("verLine").textContent="نسخة التطبيق "+APPV;</script>
+<style>
+.gi.sel{outline:4px solid #25a244;outline-offset:-4px}.gi.sel::before{content:"✔";position:absolute;top:4px;left:4px;z-index:2;background:#25a244;color:#fff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:700}
+#selBtn{margin-right:auto;background:#fff;border:1px solid #1f4e3d;color:#1f4e3d;border-radius:10px;padding:6px 10px;font-weight:700}
+#selBtn.on{background:#1f4e3d;color:#fff}
+#selBar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:#fff;box-shadow:0 -2px 10px #0004;padding:10px;display:none;gap:8px;direction:rtl}
+#selBar button{flex:1;padding:13px;border:0;border-radius:12px;font-size:16px;font-weight:700}
+#selGo{background:#25a244;color:#fff}#selClr{background:#eee;flex:0 0 30%!important}
+</style>
+<div id="selBar"><button type="button" id="selGo">💬 مشاركة واتساب (0)</button><button type="button" id="selClr">إلغاء</button></div>
+<script>
+(function(){
+const $$=id=>document.getElementById(id);
+const MAXSEL=15;const cache=new Map();
+function blobOf(it){const k=it.id||it.big;if(!cache.has(k)){const p=(async()=>{
+  const u=it.local?it.big:"https://lh3.googleusercontent.com/d/"+it.id+"=s2048";
+  const r=await fetch(u);if(!r.ok)throw new Error("f");const bl=await r.blob();if(!bl.type.startsWith("image/")||bl.size<500)throw new Error("t");return bl})();
+  p.catch(()=>cache.delete(k));cache.set(k,p)}return cache.get(k)}
+const fname=it=>(it.label||"image").replace(/[\\/:*?"<>|]/g,"_")+".jpg";
+const canFiles=()=>!!(navigator.share&&navigator.canShare);
+async function shareItems(items,btn,txt0){
+  if(!canFiles()){alert("المشاركة المباشرة غير متاحة في هذا المتصفح. افتح التطبيق من Chrome على الموبايل، أو استخدم زر التحميل.");return}
+  const old=btn.textContent;btn.disabled=true;btn.textContent="جاري التجهيز...";
+  try{
+    const bls=await Promise.all(items.map(blobOf));
+    const files=bls.map((b,i)=>new File([b],fname(items[i]),{type:b.type||"image/jpeg"}));
+    if(!navigator.canShare({files})){alert("الجهاز لا يقبل مشاركة هذه الصور. استخدم زر التحميل.");return}
+    const d={files};if(items.length===1)d.text=items[0].label;
+    await navigator.share(d);
+  }catch(e){if(!e||e.name!=="AbortError")alert("تعذر المشاركة، تأكد من الإنترنت وحاول تاني")}
+  finally{btn.disabled=false;btn.textContent=old;if(txt0)btn.textContent=txt0()}}
+// single photo
+const oo=window.openOv;window.openOv=function(it){oo(it);try{blobOf(it).catch(()=>{})}catch(e){}};
+$$("ovShare").onclick=()=>{if(curIt)shareItems([curIt],$$("ovShare"))};
+// multi select
+let sel=false;const S=new Set();
+const btn=document.createElement("button");btn.type="button";btn.id="selBtn";btn.textContent="☑ تحديد عدة صور";
+$$("backBar").appendChild(btn);
+function upd(){$$("selGo").textContent="💬 مشاركة واتساب ("+S.size+")";$$("selBar").style.display=sel?"flex":"none";$$("selGo").disabled=!S.size;btn.classList.toggle("on",sel);btn.textContent=sel?"✖ إنهاء التحديد":"☑ تحديد عدة صور"}
+function clear(){sel=false;S.clear();document.querySelectorAll(".gi.sel").forEach(c=>c.classList.remove("sel"));upd()}
+btn.onclick=()=>{if(sel)clear();else{sel=true;upd()}};
+$$("selClr").onclick=clear;
+document.addEventListener("click",e=>{if(!sel)return;const c=e.target.closest&&e.target.closest(".gi");if(!c||!c._it)return;e.stopPropagation();e.preventDefault();
+  const it=c._it;if(S.has(it)){S.delete(it);c.classList.remove("sel")}else{if(S.size>=MAXSEL){alert("الحد الأقصى "+MAXSEL+" صورة في المرة");return}S.add(it);c.classList.add("sel");blobOf(it).catch(()=>{})}upd()},true);
+$$("selGo").onclick=()=>{shareItems([...S],$$("selGo"),()=>"💬 مشاركة واتساب ("+S.size+")")};
+const rg=window.renderGallery;window.renderGallery=function(){S.clear();sel=false;upd();return rg.apply(this,arguments)};
+upd();
+})();
+</script>
 </body>
 </html>
 <script>
@@ -536,4 +584,4 @@ $("btnTrash").onclick=()=>{
   const L=$("trL");if(!HIDL.length)L.textContent="لا توجد صور محذوفة.";
   HIDL.forEach(x=>{const r=document.createElement("div");r.className="trow";const im=document.createElement("img");im.src=T[x.i]||thumbUrl(x.i,100);r.appendChild(im);const sp=document.createElement("span");sp.textContent=(x.n||x.i)+" "+(x.c||"");r.appendChild(sp);const b=document.createElement("button");b.type="button";b.textContent="استرجاع";b.onclick=async()=>{b.disabled=true;try{await ownSave(l=>l.filter(y=>y.i!==x.i));r.remove();renderGallery()}catch(e){b.textContent="فشل"}};r.appendChild(b);L.appendChild(r)})};
 $("btnBack").onclick=goBack;
-    </script>
+                                                                                                                                                                                                                                                                                    </script>
