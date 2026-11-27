@@ -369,7 +369,7 @@ loadGallery().catch(e=>{try{console.error(e)}catch(_){}});
 if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister())).catch(()=>{});try{caches.keys().then(k=>k.forEach(x=>caches.delete(x)))}catch(e){}}
 
 // ===== Gallery =====
-let G=(function(){try{var c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items&&c.items.length)return c}catch(e){}return{endpoint:"",items:[]}})(),HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.16 - 2026-11-27_2030";
+let G=(function(){try{var c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items&&c.items.length)return c}catch(e){}return{endpoint:"",items:[]}})(),HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.17 - 2026-11-27_2115";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 function ft(u,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||8000);return fetch(u,{signal:c.signal}).finally(()=>clearTimeout(t))}
@@ -380,8 +380,8 @@ async function loadGallery(){
   try{const r=await ft("hidden.json?"+Date.now(),5000);const j=await r.json();HIDL=j.items||[];HID=new Set(HIDL.map(x=>x.i))}catch(e){}
   await renderGallery();
   // thumbnails load in the background; the list is already visible
-  let left=23,done=false;const fin=()=>{if(done)return;done=true;const ov=$("ov");const busy=(ov&&ov.style.display==="flex")||document.querySelector(".gi.sel");if(!busy)renderGallery()};
-  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23].forEach(async k=>{try{const r=await ft("thumbs"+k+".json?v="+(G.updated||3),20000);Object.assign(T,await r.json())}catch(e){}finally{if(--left===0)fin()}});
+  let left=24,done=false;const fin=()=>{if(done)return;done=true;const ov=$("ov");const busy=(ov&&ov.style.display==="flex")||document.querySelector(".gi.sel");if(!busy)renderGallery()};
+  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24].forEach(async k=>{try{const r=await ft("thumbs"+k+".json?v="+(G.updated||3),20000);Object.assign(T,await r.json())}catch(e){}finally{if(--left===0)fin()}});
   setTimeout(fin,15000);
 }
 const uq=a=>{const k=o=>o.s+"|"+o.n;const nr=new Set(a.filter(o=>o.c!=="فئة الرواكد").map(k));return a.filter(o=>o.c!=="فئة الرواكد"||!nr.has(k(o))).length};
