@@ -370,7 +370,7 @@ loadGallery().catch(e=>{try{console.error(e)}catch(_){}});
 if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister())).catch(()=>{});try{caches.keys().then(k=>k.forEach(x=>caches.delete(x)))}catch(e){}}
 
 // ===== Gallery =====
-let G=(function(){try{var c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items&&c.items.length)return c}catch(e){}return{endpoint:"",items:[]}})(),HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.19 - 2026-11-27_2140";
+let G=(function(){try{var c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items&&c.items.length)return c}catch(e){}return{endpoint:"",items:[]}})(),HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.20 - 2026-11-27_2150";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function capSet(it){const e=$("ovCap");e.textContent="";const b=document.createElement("bdi");b.dir="ltr";b.style.unicodeBidi="isolate";b.textContent=codeOf(it.name||it.label||"");e.appendChild(b);e.appendChild(document.createTextNode(" - "+(it.cat||"")+(LIST.length>1?"  ("+(IDX+1)+"/"+LIST.length+")":"")))}
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
@@ -478,7 +478,7 @@ function blobOf(it){const k=it.id||it.big;if(!cache.has(k)){const p=(async()=>{
   const u=it.local?it.big:"https://lh3.googleusercontent.com/d/"+it.id+"=s2048";
   const r=await fetch(u);if(!r.ok)throw new Error("f");const bl=await r.blob();if(!bl.type.startsWith("image/")||bl.size<500)throw new Error("t");return bl})();
   p.catch(()=>cache.delete(k));cache.set(k,p)}return cache.get(k)}
-window.__nm=it=>{const l=(it.label||"image").trim(),c=(it.cat||"").trim();let n=(c&&l.toLowerCase().indexOf(c.toLowerCase())!==0)?c+" "+l:l;return n.replace(/[\\/:*?"<>|]/g,"_").replace(/\s+/g," ").trim()};
+window.__nm=(it,txt)=>{const M="\u200E",l=(it.label||"image").trim(),c=(it.cat||"").trim();let code=txt?l:l.replace(/[\\/:*?"<>|]/g,"_");code=code.replace(/\s+/g," ");let n=M+code+M;if(c&&l.toLowerCase().indexOf(c.toLowerCase())<0)n+=" "+c.replace(/[\\/:*?"<>|]/g,"_");return n.replace(/\s+/g," ").trim()};
 const fname=it=>window.__nm(it)+".jpg";
 const canFiles=()=>!!(navigator.share&&navigator.canShare);
 async function shareItems(items,btn,txt0){
@@ -488,7 +488,7 @@ async function shareItems(items,btn,txt0){
     const bls=await Promise.all(items.map(blobOf));
     const files=bls.map((b,i)=>new File([b],fname(items[i]),{type:b.type||"image/jpeg"}));
     if(!navigator.canShare({files})){alert("الجهاز لا يقبل مشاركة هذه الصور. استخدم زر التحميل.");return}
-    const d={files};if(items.length===1)d.text=window.__nm(items[0]);
+    const d={files};if(items.length===1)d.text=window.__nm(items[0],1);
     await navigator.share(d);
   }catch(e){if(!e||e.name!=="AbortError")alert("تعذر المشاركة، تأكد من الإنترنت وحاول تاني")}
   finally{btn.disabled=false;btn.textContent=old;if(txt0)btn.textContent=txt0()}}
