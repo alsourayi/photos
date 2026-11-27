@@ -78,6 +78,16 @@ button.link{background:none;color:var(--g2);border:0;text-decoration:underline;f
 details summary{color:#6b675c;font-size:14px}
 #statCard,#listCard,#btnWipe{display:none!important}</style>
 <script>
+(function(){var errs=[];window.__errs=errs;
+function show(){try{var d=document.getElementById("__diag");if(!d){d=document.createElement("div");d.id="__diag";d.style.cssText="position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#fff3f3;color:#7a0000;border:2px solid #c62828;border-radius:12px;padding:10px;font:13px/1.5 sans-serif;direction:rtl;max-height:60vh;overflow:auto";(document.body||document.documentElement).appendChild(d)}
+d.innerHTML="";var t=document.createElement("div");t.style.fontWeight="700";t.textContent="حصل خطأ في التطبيق. صوّر الشاشة وابعتها:";d.appendChild(t);
+var p=document.createElement("pre");p.style.cssText="white-space:pre-wrap;direction:ltr;text-align:left;margin:6px 0 0";p.textContent=errs.join("\n")+"\nUA: "+navigator.userAgent+"\nitems="+(typeof G!=="undefined"&&G.items?G.items.length:"?")+"  v="+(typeof APPV!=="undefined"?APPV:"?");d.appendChild(p)}catch(e){}}
+window.addEventListener("error",function(e){errs.push((e.message||"error")+(e.lineno?" @"+e.lineno+":"+e.colno:"")+(e.filename&&e.filename.indexOf("index")<0?" "+e.filename.split("/").pop():""));show()});
+window.addEventListener("unhandledrejection",function(e){var m=e.reason&&(e.reason.message||e.reason);if(String(m)==="timeout")return;errs.push("promise: "+m);show()});
+window.__diagShow=show;
+setTimeout(function(){try{if(typeof G==="undefined"||!G.items||!G.items.length){errs.push("القائمة ما اتحملتش بعد 8 ثواني (الإنترنت بطيء أو فيه خطأ)");show()}}catch(e){errs.push("watchdog "+e);show()}},8000)})();
+</script>
+<script>
 (function(){function f(){var n=+(document.getElementById("sTot").textContent||0);var a=document.getElementById("statCard"),b=document.getElementById("listCard");if(a)a.style.display=n?"":"none";if(b)b.style.display=n?"":"none"}
 document.addEventListener("DOMContentLoaded",function(){f();new MutationObserver(f).observe(document.getElementById("sTot"),{childList:true,characterData:true,subtree:true})})})();
 </script>
@@ -231,8 +241,8 @@ async function getAll(){return useMem?mem.slice():allPhotos()}
 async function add(p){if(useMem){p.id=mem.length+1+Math.random();mem.push(p)}else await req(tx("photos","readwrite").add(p))}
 async function del(id){if(useMem)mem=mem.filter(x=>x.id!==id);else await req(tx("photos","readwrite").delete(id))}
 async function wipe(){if(useMem)mem=[];else await req(tx("photos","readwrite").clear())}
-let maps={...SEED};
-async function loadMaps(){try{const v=useMem?null:await req(tx("kv").get("maps"));if(v)maps={...SEED,...v}}catch(e){}}
+let maps=Object.assign({},SEED);
+async function loadMaps(){try{const v=useMem?null:await req(tx("kv").get("maps"));if(v)maps=Object.assign({},SEED,v)}catch(e){}}
 async function saveMaps(){try{if(!useMem)await req(tx("kv","readwrite").put(maps,"maps"))}catch(e){}}
 // ---- image resize
 function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>{res({i,u})};i.onerror=()=>rej(new Error("img"));i.src=u})}
@@ -359,7 +369,7 @@ loadGallery().catch(e=>{try{console.error(e)}catch(_){}});
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.9 - 2026-11-27_1215 10:10";
+let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.10 - 2026-11-27_1230 10:10";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 function ft(u,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||8000);return fetch(u,{signal:c.signal}).finally(()=>clearTimeout(t))}
@@ -641,4 +651,4 @@ $("btnTrash").onclick=()=>{
   const L=$("trL");if(!HIDL.length)L.textContent="لا توجد صور محذوفة.";
   HIDL.forEach(x=>{const r=document.createElement("div");r.className="trow";const im=document.createElement("img");im.src=T[x.i]||thumbUrl(x.i,100);r.appendChild(im);const sp=document.createElement("span");sp.textContent=(x.n||x.i)+" "+(x.c||"");r.appendChild(sp);const b=document.createElement("button");b.type="button";b.textContent="استرجاع";b.onclick=async()=>{b.disabled=true;try{await ownSave(l=>l.filter(y=>y.i!==x.i));r.remove();renderGallery()}catch(e){b.textContent="فشل"}};r.appendChild(b);L.appendChild(r)})};
 $("btnBack").onclick=goBack;
-    </script>
+  </script>
