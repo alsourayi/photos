@@ -143,6 +143,7 @@ header{padding:4px 8px 4px!important}
 .tt{font-size:16px!important;margin-top:3px!important}
 .lw{display:block;position:relative;direction:ltr;width:min(70vw,290px);aspect-ratio:1133/478;overflow:hidden;margin:0 auto;line-height:0}
 .lw #logo{position:absolute!important;display:block!important;max-width:none!important;max-height:none!important;width:calc(100% * 1279 / 1133)!important;height:auto!important;left:calc(-100% * 76 / 1133)!important;top:calc(-100% * 665 / 478)!important;margin:0!important}
+.gi span{direction:ltr!important;unicode-bidi:isolate!important}
 </style>
 </head>
 <body>
@@ -369,8 +370,9 @@ loadGallery().catch(e=>{try{console.error(e)}catch(_){}});
 if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister())).catch(()=>{});try{caches.keys().then(k=>k.forEach(x=>caches.delete(x)))}catch(e){}}
 
 // ===== Gallery =====
-let G=(function(){try{var c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items&&c.items.length)return c}catch(e){}return{endpoint:"",items:[]}})(),HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.18 - 2026-11-27_2125";
+let G=(function(){try{var c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items&&c.items.length)return c}catch(e){}return{endpoint:"",items:[]}})(),HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.19 - 2026-11-27_2140";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
+function capSet(it){const e=$("ovCap");e.textContent="";const b=document.createElement("bdi");b.dir="ltr";b.style.unicodeBidi="isolate";b.textContent=codeOf(it.name||it.label||"");e.appendChild(b);e.appendChild(document.createTextNode(" - "+(it.cat||"")+(LIST.length>1?"  ("+(IDX+1)+"/"+LIST.length+")":"")))}
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 function ft(u,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||8000);return fetch(u,{signal:c.signal}).finally(()=>clearTimeout(t))}
 async function loadGallery(){
@@ -440,7 +442,7 @@ async function renderGallery(){
 }
 function goBack(){if(history.state&&history.state.g){history.back()}else{gCat="";gCatS="";gQ="";$("gq").value="";renderGallery()}}
 window.addEventListener("popstate",e=>{if(e.state&&e.state.c){gCat=e.state.c;gCatS=e.state.s;gQ="";$("gq").value="";renderGallery();return}gCat="";gCatS="";gQ="";$("gq").value="";renderGallery()});
-let curIt=null,curBlobP=null;const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);function openOv(it){curIt=it;curBlobP=null;if(IOS&&it.id){curBlobP=fetch("https://lh3.googleusercontent.com/d/"+it.id+"=s0").then(r=>{if(!r.ok)throw 1;return r.blob()}).catch(()=>null)}$("ovDl").textContent="⬇ تحميل";$("ovImg").onerror=()=>{if(it.id&&!$("ovImg").dataset.r){$("ovImg").dataset.r=1;$("ovImg").src=it.src}};delete $("ovImg").dataset.r;$("ovImg").src=it.big;$("ovCap").textContent=it.cap+(LIST.length>1?"  ("+(IDX+1)+"/"+LIST.length+")":"");$("ov").style.display="flex"}
+let curIt=null,curBlobP=null;const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);function openOv(it){curIt=it;curBlobP=null;if(IOS&&it.id){curBlobP=fetch("https://lh3.googleusercontent.com/d/"+it.id+"=s0").then(r=>{if(!r.ok)throw 1;return r.blob()}).catch(()=>null)}$("ovDl").textContent="⬇ تحميل";$("ovImg").onerror=()=>{if(it.id&&!$("ovImg").dataset.r){$("ovImg").dataset.r=1;$("ovImg").src=it.src}};delete $("ovImg").dataset.r;$("ovImg").src=it.big;capSet(it);$("ov").style.display="flex"}
 function setTab(g){$("viewAdd").hidden=g;$("viewGal").hidden=!g;$("tabAdd").classList.toggle("on",!g);$("tabGal").classList.toggle("on",g);if(g)renderGallery()}
 function blobB64(b){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(String(f.result).split(",")[1]);f.readAsDataURL(b)})}
 async function uploadAll(){
@@ -665,4 +667,4 @@ $("btnTrash").onclick=()=>{
   const L=$("trL");if(!HIDL.length)L.textContent="لا توجد صور محذوفة.";
   HIDL.forEach(x=>{const r=document.createElement("div");r.className="trow";const im=document.createElement("img");im.src=T[x.i]||thumbUrl(x.i,100);r.appendChild(im);const sp=document.createElement("span");sp.textContent=(x.n||x.i)+" "+(x.c||"");r.appendChild(sp);const b=document.createElement("button");b.type="button";b.textContent="استرجاع";b.onclick=async()=>{b.disabled=true;try{await ownSave(l=>l.filter(y=>y.i!==x.i));r.remove();renderGallery()}catch(e){b.textContent="فشل"}};r.appendChild(b);L.appendChild(r)})};
 $("btnBack").onclick=goBack;
-    </script>
+  </script>
