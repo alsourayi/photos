@@ -357,7 +357,7 @@ openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.7 - 2026-11-27_0150 10:10";
+let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.8 - 2026-11-27_1055 10:10";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 async function loadGallery(){
@@ -459,7 +459,8 @@ function blobOf(it){const k=it.id||it.big;if(!cache.has(k)){const p=(async()=>{
   const u=it.local?it.big:"https://lh3.googleusercontent.com/d/"+it.id+"=s2048";
   const r=await fetch(u);if(!r.ok)throw new Error("f");const bl=await r.blob();if(!bl.type.startsWith("image/")||bl.size<500)throw new Error("t");return bl})();
   p.catch(()=>cache.delete(k));cache.set(k,p)}return cache.get(k)}
-const fname=it=>(it.label||"image").replace(/[\\/:*?"<>|]/g,"_")+".jpg";
+window.__nm=it=>{const l=(it.label||"image").trim(),c=(it.cat||"").trim();let n=(c&&l.toLowerCase().indexOf(c.toLowerCase())!==0)?c+" "+l:l;return n.replace(/[\\/:*?"<>|]/g,"_").replace(/\s+/g," ").trim()};
+const fname=it=>window.__nm(it)+".jpg";
 const canFiles=()=>!!(navigator.share&&navigator.canShare);
 async function shareItems(items,btn,txt0){
   if(!canFiles()){alert("المشاركة المباشرة غير متاحة في هذا المتصفح. افتح التطبيق من Chrome على الموبايل، أو استخدم زر التحميل.");return}
@@ -468,7 +469,7 @@ async function shareItems(items,btn,txt0){
     const bls=await Promise.all(items.map(blobOf));
     const files=bls.map((b,i)=>new File([b],fname(items[i]),{type:b.type||"image/jpeg"}));
     if(!navigator.canShare({files})){alert("الجهاز لا يقبل مشاركة هذه الصور. استخدم زر التحميل.");return}
-    const d={files};if(items.length===1)d.text=items[0].label;
+    const d={files};if(items.length===1)d.text=window.__nm(items[0]);
     await navigator.share(d);
   }catch(e){if(!e||e.name!=="AbortError")alert("تعذر المشاركة، تأكد من الإنترنت وحاول تاني")}
   finally{btn.disabled=false;btn.textContent=old;if(txt0)btn.textContent=txt0()}}
@@ -538,7 +539,7 @@ window.addEventListener("online",()=>{});
 </script>
 <script>
 document.getElementById("ovDl").onclick=async()=>{const it=curIt;if(!it)return;const b=document.getElementById("ovDl");
- const fn=(it.label||"image").replace(/[\\/:*?"<>|]/g,"_")+".jpg";
+ const fn=(window.__nm?window.__nm(it):(it.label||"image"))+".jpg";
  const save=(blob)=>{const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),20000)};
  b.disabled=true;b.textContent="جاري التحميل...";
  try{
