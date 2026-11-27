@@ -370,7 +370,7 @@ loadGallery().catch(e=>{try{console.error(e)}catch(_){}});
 if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister())).catch(()=>{});try{caches.keys().then(k=>k.forEach(x=>caches.delete(x)))}catch(e){}}
 
 // ===== Gallery =====
-let G=(function(){try{var c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items&&c.items.length)return c}catch(e){}return{endpoint:"",items:[]}})(),HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.20 - 2026-11-27_2150";
+let G=(function(){try{var c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items&&c.items.length)return c}catch(e){}return{endpoint:"",items:[]}})(),HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.21 - 2026-11-27_2215";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function capSet(it){const e=$("ovCap");e.textContent="";const b=document.createElement("bdi");b.dir="ltr";b.style.unicodeBidi="isolate";b.textContent=codeOf(it.name||it.label||"");e.appendChild(b);e.appendChild(document.createTextNode(" - "+(it.cat||"")+(LIST.length>1?"  ("+(IDX+1)+"/"+LIST.length+")":"")))}
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
@@ -408,7 +408,7 @@ async function renderGallery(){
       const h=document.createElement("div");h.className="sech";h.textContent=sec+" ("+tot+")";L.appendChild(h);
       const g=document.createElement("div");g.className="cgrid";
       cats.forEach(c=>{const arr=by[sec][c];const d=document.createElement("div");d.className="cc";
-        const im=document.createElement("img");im.alt=c;if(arr.length){im.src=src(arr[0])}else{im.style.visibility="hidden"}d.appendChild(im);
+        const im=document.createElement("img");im.alt=c;if(arr.length){const cv=(G.cover||{})[sec+"|"+c];if(cv&&cv.indexOf("art:")===0){im.src=cv.slice(4)}else{const co=(cv&&arr.find(o=>o.i===cv))||arr[0];im.onerror=()=>{im.onerror=null;im.src=src(co)};im.src=thumbUrl(co.i,420)}}else{im.style.visibility="hidden"}d.appendChild(im);
         const n=document.createElement("div");n.className="cn";n.innerHTML="<b></b><i></i>";n.firstChild.textContent=c;n.lastChild.textContent=arr.length;d.appendChild(n);
         d.onclick=()=>{gCat=c;gCatS=sec;history.pushState({g:1},"");renderGallery();window.scrollTo(0,0)};g.appendChild(d)});
       L.appendChild(g)});
