@@ -369,7 +369,7 @@ loadGallery().catch(e=>{try{console.error(e)}catch(_){}});
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.12 - 2026-11-27_1255";
+let G=(function(){try{var c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items&&c.items.length)return c}catch(e){}return{endpoint:"",items:[]}})(),HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.13 - 2026-11-27_1305";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
 function ft(u,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||8000);return fetch(u,{signal:c.signal}).finally(()=>clearTimeout(t))}
@@ -602,7 +602,7 @@ $$("btnSentOk").onclick=async()=>{await wipe();await render();$$("btnSentOk").hi
 })();
 setTab(true);{const b=$("boot");if(b)b.style.display="none"}
 (function(){let last=Date.now();
-function healthy(){const g=$("gList");return !!(g&&g.children.length)||!$("viewGal")||$("viewGal").hidden}
+function healthy(){const g=$("gList");return !!(g&&g.children.length&&G&&G.items&&G.items.length)||!$("viewGal")||$("viewGal").hidden}
 function resume(p){try{const b=$("boot");if(b)b.style.display="none";
  const d=$("__diag");if(d&&healthy())d.remove();
  if(!healthy()){try{renderGallery()}catch(e){}
