@@ -1,4 +1,4 @@
-const C="reps-v1112";const A=["./","index.html","manifest.webmanifest","icon.svg"];
+const C="reps-v1113";const A=["./","index.html","manifest.webmanifest","icon.svg"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)).catch(()=>{}));self.skipWaiting()});
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>clients.claim())));
 // Only the app shell is handled: instant from cache, refreshed in background. Everything else goes straight to the network.
