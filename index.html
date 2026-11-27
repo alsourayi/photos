@@ -667,4 +667,4 @@ $("btnTrash").onclick=()=>{
   const L=$("trL");if(!HIDL.length)L.textContent="لا توجد صور محذوفة.";
   HIDL.forEach(x=>{const r=document.createElement("div");r.className="trow";const im=document.createElement("img");im.src=T[x.i]||thumbUrl(x.i,100);r.appendChild(im);const sp=document.createElement("span");sp.textContent=(x.n||x.i)+" "+(x.c||"");r.appendChild(sp);const b=document.createElement("button");b.type="button";b.textContent="استرجاع";b.onclick=async()=>{b.disabled=true;try{await ownSave(l=>l.filter(y=>y.i!==x.i));r.remove();renderGallery()}catch(e){b.textContent="فشل"}};r.appendChild(b);L.appendChild(r)})};
 $("btnBack").onclick=goBack;
-  </script>
+                                                                                                                    </script>
