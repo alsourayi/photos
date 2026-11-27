@@ -353,19 +353,26 @@ function init(){
   $("btnAddMap").onclick=()=>toast("الربط بيتحفظ تلقائي لما تحفظ صور بكود جديد");
   renderMaps();render();
 }
-openDB().catch(()=>{useMem=true}).then(loadMaps).then(init).then(loadGallery);
+function _t(ms){return new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))}
+Promise.race([openDB(),_t(3500)]).catch(()=>{useMem=true}).then(loadMaps).then(init).catch(e=>{try{console.error(e)}catch(_){}});
+loadGallery().catch(e=>{try{console.error(e)}catch(_){}});
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 // ===== Gallery =====
-let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.8 - 2026-11-27_1055 10:10";
+let G={endpoint:"",items:[]},HID=new Set(),HIDL=[],OWNER=null,gCatS="",gCat="",gSec="",gQ="",T={},LIST=[],IDX=0;const APPV="v11.9 - 2026-11-27_1215 10:10";
 const thumbUrl=(id,w)=>"https://lh3.googleusercontent.com/d/"+id+"=w"+w;
 function codeOf(n){return n.replace(/\.[^.]+$/,"")}
+function ft(u,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||8000);return fetch(u,{signal:c.signal}).finally(()=>clearTimeout(t))}
 async function loadGallery(){
-  try{const r=await fetch("gallery.json?"+Date.now());G=await r.json()}catch(e){}
-  if(G.endpoint){try{const r=await fetch(G.endpoint+"?action=list");const j=await r.json();if(j&&j.items){G.items=j.items;$("gStat").dataset.live="1"}}catch(e){}}
-  try{const r=await fetch("hidden.json?"+Date.now());const j=await r.json();HIDL=j.items||[];HID=new Set(HIDL.map(x=>x.i))}catch(e){}
-  await Promise.all([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(async k=>{try{const r=await fetch("thumbs"+k+".json?v="+(G.updated||3));Object.assign(T,await r.json())}catch(e){}}));
+  try{const r=await ft("gallery.json?"+Date.now(),9000);G=await r.json();try{localStorage.setItem("galc",JSON.stringify(G))}catch(e){}}
+  catch(e){try{const c=JSON.parse(localStorage.getItem("galc")||"null");if(c&&c.items)G=c}catch(e2){}}
+  if(G.endpoint){try{const r=await ft(G.endpoint+"?action=list",6000);const j=await r.json();if(j&&j.items){G.items=j.items;$("gStat").dataset.live="1"}}catch(e){}}
+  try{const r=await ft("hidden.json?"+Date.now(),5000);const j=await r.json();HIDL=j.items||[];HID=new Set(HIDL.map(x=>x.i))}catch(e){}
   await renderGallery();
+  // thumbnails load in the background; the list is already visible
+  let left=20,done=false;const fin=()=>{if(done)return;done=true;const ov=$("ov");const busy=(ov&&ov.style.display==="flex")||document.querySelector(".gi.sel");if(!busy)renderGallery()};
+  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].forEach(async k=>{try{const r=await ft("thumbs"+k+".json?v="+(G.updated||3),20000);Object.assign(T,await r.json())}catch(e){}finally{if(--left===0)fin()}});
+  setTimeout(fin,15000);
 }
 const uq=a=>{const k=o=>o.s+"|"+o.n;const nr=new Set(a.filter(o=>o.c!=="فئة الرواكد").map(k));return a.filter(o=>o.c!=="فئة الرواكد"||!nr.has(k(o))).length};
 async function renderGallery(){
